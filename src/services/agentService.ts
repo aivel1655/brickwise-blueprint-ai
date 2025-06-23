@@ -277,6 +277,8 @@ class AgentService {
       data: { blueprint }
     };
   }
+
+  private fallbackPlannerResponse(): AgentResponse {
     const blueprint: Blueprint = {
       id: 'bp-001',
       phases: [
