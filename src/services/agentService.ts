@@ -122,121 +122,183 @@ class AgentService {
       return this.fallbackPlannerResponse();
     }
     
-    // Create blueprint based on parsed build type
-    const blueprint = this.createBlueprintForBuildType(parsed);
-    
-    this.conversationState.phase = 'review';
-    
-    return {
-      agent: 'planner',
-      message: `I've created a comprehensive blueprint for your ${parsed.buildType.replace('_', ' ')} project. Here's the strategic plan with phases, materials, and cost estimates.`,
-      data: { blueprint, parsedRequest: parsed }
-    };
-  }
-
-  private createBlueprintForBuildType(parsed: ParsedRequest): Blueprint {
-    // For now, enhanced pizza oven blueprint, but this will be expanded
-    // when we implement the Planning Agent Templates
-    if (parsed.buildType === 'pizza_oven') {
-      return this.createPizzaOvenBlueprint(parsed);
+    try {
+      // Use MockCatalogAgent to calculate materials
+      const materials = this.catalogAgent.calculateMaterialNeeds(parsed.buildType, parsed.dimensions);
+      
+      // Create enhanced blueprint using calculated materials
+      const blueprint = this.createEnhancedBlueprint(parsed, materials);
+      
+      this.conversationState.phase = 'review';
+      
+      return {
+        agent: 'planner',
+        message: `I've created a comprehensive blueprint for your ${parsed.buildType.replace('_', ' ')} project using our material catalog. Here's the strategic plan with accurate material calculations, costs, and delivery estimates.`,
+        data: { 
+          blueprint, 
+          parsedRequest: parsed,
+          materialCalculation: materials,
+          catalogUsed: true
+        }
+      };
+    } catch (error) {
+      console.error('Error calculating materials:', error);
+      return this.fallbackPlannerResponse();
     }
-    
-    // Basic blueprint for other types - will be enhanced in next phase
-    return this.createBasicBlueprint(parsed);
   }
 
-  private createPizzaOvenBlueprint(parsed: ParsedRequest): Blueprint {
+  private createEnhancedBlueprint(parsed: ParsedRequest, materials: MaterialCalculation): Blueprint {
+    const phases = this.generatePhasesFromMaterials(parsed, materials);
+    
+    return {
+      id: `bp-${parsed.buildType}-${Date.now()}`,
+      phases: phases,
+      totalCost: materials.totalCost,
+      estimatedTime: this.estimateProjectTime(parsed, materials),
+      materials: materials.materials.map(calc => ({
+        id: calc.material.id,
+        name: calc.material.name,
+        quantity: calc.quantity,
+        unit: calc.material.unit,
+        pricePerUnit: calc.material.price,
+        totalPrice: calc.totalCost,
+        sapSku: calc.material.id,
+        inStock: calc.material.inStock
+      }))
+    };
+  }
+
+  private generatePhasesFromMaterials(parsed: ParsedRequest, materials: MaterialCalculation) {
+    const buildType = parsed.buildType;
+    const phases = [];
+
+    // Phase 1: Preparation and Foundation (if needed)
+    const foundationMaterials = materials.materials.filter(m => 
+      m.material.category === 'foundation' || m.material.id.includes('concrete')
+    );
+
+    if (foundationMaterials.length > 0) {
+      phases.push({
+        id: 'phase-foundation',
+        name: 'Foundation Preparation',
+        description: `Prepare and pour foundation for the ${buildType.replace('_', ' ')}`,
+        duration: this.estimatePhaseDuration('foundation', parsed),
+        order: 1,
+        materials: foundationMaterials.map(calc => ({
+          id: calc.material.id,
+          name: calc.material.name,
+          quantity: calc.quantity,
+          unit: calc.material.unit,
+          pricePerUnit: calc.material.price,
+          totalPrice: calc.totalCost,
+          inStock: calc.material.inStock
+        })),
+        tools: ['Level', 'Shovel', 'Wheelbarrow', 'Float']
+      });
+    }
+
+    // Phase 2: Main Construction
+    const constructionMaterials = materials.materials.filter(m => 
+      m.material.category === 'brick' || m.material.category === 'mortar'
+    );
+
+    if (constructionMaterials.length > 0) {
+      phases.push({
+        id: 'phase-construction',
+        name: 'Main Construction',
+        description: `Build the main ${buildType.replace('_', ' ')} structure`,
+        duration: this.estimatePhaseDuration('construction', parsed),
+        order: phases.length + 1,
+        materials: constructionMaterials.map(calc => ({
+          id: calc.material.id,
+          name: calc.material.name,
+          quantity: calc.quantity,
+          unit: calc.material.unit,
+          pricePerUnit: calc.material.price,
+          totalPrice: calc.totalCost,
+          inStock: calc.material.inStock
+        })),
+        tools: ['Trowel', 'Level', 'Rubber mallet', 'Measuring tape']
+      });
+    }
+
+    // Phase 3: Insulation and Finishing (if applicable)
+    const finishingMaterials = materials.materials.filter(m => 
+      m.material.category === 'insulation' || m.material.category === 'accessory'
+    );
+
+    if (finishingMaterials.length > 0 || buildType === 'pizza_oven') {
+      phases.push({
+        id: 'phase-finishing',
+        name: 'Insulation & Finishing',
+        description: `Complete insulation and finishing touches`,
+        duration: this.estimatePhaseDuration('finishing', parsed),
+        order: phases.length + 1,
+        materials: finishingMaterials.map(calc => ({
+          id: calc.material.id,
+          name: calc.material.name,
+          quantity: calc.quantity,
+          unit: calc.material.unit,
+          pricePerUnit: calc.material.price,
+          totalPrice: calc.totalCost,
+          inStock: calc.material.inStock
+        })),
+        tools: ['Trowel', 'Knife', 'Brush']
+      });
+    }
+
+    return phases;
+  }
+
+  private estimateProjectTime(parsed: ParsedRequest, materials: MaterialCalculation): string {
+    const buildType = parsed.buildType;
     const dimensions = parsed.dimensions;
-    const baseSize = dimensions.length || dimensions.width || 1.0;
-    const multiplier = baseSize; // Scale materials based on size
+    const surfaceArea = (dimensions.length || 1) * (dimensions.height || 1);
     
-    return {
-      id: 'bp-001',
-      phases: [
-        {
-          id: 'phase-1',
-          name: 'Foundation Preparation',
-          description: 'Prepare the base and foundation for the pizza oven',
-          duration: '2-3 days',
-          order: 1,
-          materials: [
-            { 
-              id: 'm1', 
-              name: 'Concrete mix', 
-              quantity: Math.ceil(2 * multiplier), 
-              unit: 'bags', 
-              pricePerUnit: 8.50, 
-              totalPrice: Math.ceil(2 * multiplier) * 8.50, 
-              inStock: true 
-            },
-            { 
-              id: 'm2', 
-              name: 'Rebar', 
-              quantity: Math.ceil(6 * multiplier), 
-              unit: 'pieces', 
-              pricePerUnit: 4.20, 
-              totalPrice: Math.ceil(6 * multiplier) * 4.20, 
-              inStock: true 
-            }
-          ],
-          tools: ['Level', 'Shovel', 'Wheelbarrow']
-        },
-        {
-          id: 'phase-2',
-          name: 'Oven Construction',
-          description: 'Build the main oven structure with firebricks',
-          duration: '3-4 days',
-          order: 2,
-          materials: [
-            { 
-              id: 'm3', 
-              name: 'Firebrick panels', 
-              quantity: Math.ceil(45 * multiplier * multiplier), 
-              unit: 'pieces', 
-              pricePerUnit: 10.00, 
-              totalPrice: Math.ceil(45 * multiplier * multiplier) * 10.00, 
-              sapSku: 'FB-001', 
-              inStock: true 
-            },
-            { 
-              id: 'm4', 
-              name: 'Refractory mortar', 
-              quantity: Math.ceil(3 * multiplier), 
-              unit: 'bags', 
-              pricePerUnit: 15.80, 
-              totalPrice: Math.ceil(3 * multiplier) * 15.80, 
-              inStock: true 
-            }
-          ],
-          tools: ['Trowel', 'Rubber mallet', 'Measuring tape']
-        }
-      ],
-      totalCost: 0, // Will be calculated
-      estimatedTime: `${Math.ceil(5 * multiplier)}-${Math.ceil(7 * multiplier)} days`,
-      materials: []
-    };
+    let baseDays = 1;
+    
+    switch (buildType) {
+      case 'pizza_oven':
+        baseDays = 4 + Math.ceil(surfaceArea * 0.5);
+        break;
+      case 'wall':
+      case 'garden_wall':
+        baseDays = 2 + Math.ceil(surfaceArea * 0.3);
+        break;
+      case 'fire_pit':
+        baseDays = 2 + Math.ceil(surfaceArea * 0.4);
+        break;
+      case 'foundation':
+        baseDays = 1 + Math.ceil(surfaceArea * 0.2);
+        break;
+      case 'structure':
+        baseDays = 5 + Math.ceil(surfaceArea * 0.8);
+        break;
+      default:
+        baseDays = 3;
+    }
+
+    const minDays = Math.max(baseDays - 1, 1);
+    const maxDays = baseDays + 2;
+    
+    return `${minDays}-${maxDays} days`;
   }
 
-  private createBasicBlueprint(parsed: ParsedRequest): Blueprint {
-    return {
-      id: 'bp-basic',
-      phases: [
-        {
-          id: 'phase-1',
-          name: 'Planning & Preparation',
-          description: `Prepare for ${parsed.buildType.replace('_', ' ')} construction`,
-          duration: '1-2 days',
-          order: 1,
-          materials: [
-            { id: 'm1', name: 'Basic materials', quantity: 1, unit: 'set', pricePerUnit: 50.00, totalPrice: 50.00, inStock: true }
-          ],
-          tools: ['Basic tools']
-        }
-      ],
-      totalCost: 50.00,
-      estimatedTime: '1-2 days',
-      materials: []
-    };
+  private estimatePhaseDuration(phase: string, parsed: ParsedRequest): string {
+    const buildType = parsed.buildType;
+    
+    switch (phase) {
+      case 'foundation':
+        return buildType === 'structure' ? '1-2 days' : '1 day';
+      case 'construction':
+        if (buildType === 'pizza_oven') return '2-3 days';
+        if (buildType === 'structure') return '3-5 days';
+        return '1-2 days';
+      case 'finishing':
+        return buildType === 'pizza_oven' ? '1-2 days' : '0.5-1 day';
+      default:
+        return '1 day';
+    }
   }
 
   private fallbackPlannerResponse(): AgentResponse {
