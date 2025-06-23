@@ -317,6 +317,7 @@ class AgentService {
     };
   }
 
+  // Keep existing builder and joule methods but add conversation state updates
   private builderAgentResponse(): AgentResponse {
     const buildPlan: BuildPlan = {
       id: 'bp-001',
@@ -365,6 +366,8 @@ class AgentService {
       wasteBuffer: 0.1
     };
 
+    this.conversationState.phase = 'complete';
+
     return {
       agent: 'builder',
       message: "Here's your detailed step-by-step construction plan. I've included exact material quantities, tools needed, and safety tips for each phase.",
@@ -395,6 +398,7 @@ class AgentService {
     };
   }
 
+  // Legacy method for backward compatibility
   private getQuestionSuggestions(questionNumber: number): string[] {
     switch (questionNumber) {
       case 1:
@@ -408,9 +412,24 @@ class AgentService {
     }
   }
 
+  // Public methods for conversation management
+  getConversationState(): ConversationState {
+    return this.conversationState;
+  }
+
   resetSession(): void {
-    this.questionCount = 0;
+    this.conversationState = {
+      phase: 'input',
+      messages: [],
+      currentPlan: null,
+      needsInput: true
+    };
     this.projectSpecs = {};
+  }
+
+  // Method to update conversation state (for future use)
+  updateConversationState(updates: Partial<ConversationState>): void {
+    this.conversationState = { ...this.conversationState, ...updates };
   }
 }
 
