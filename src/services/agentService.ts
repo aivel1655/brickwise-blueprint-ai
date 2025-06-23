@@ -484,6 +484,26 @@ class AgentService {
     return this.conversationState;
   }
 
+  // Get catalog agent for direct access
+  getCatalogAgent(): MockCatalogAgent {
+    return this.catalogAgent;
+  }
+
+  // Get material alternatives for a specific material
+  getMaterialAlternatives(materialId: string) {
+    return this.catalogAgent.getAlternatives(materialId);
+  }
+
+  // Search materials by query
+  searchMaterials(query: string) {
+    return this.catalogAgent.searchMaterials(query);
+  }
+
+  // Get catalog statistics
+  getCatalogStats() {
+    return this.catalogAgent.getCatalogStats();
+  }
+
   resetSession(): void {
     this.conversationState = {
       phase: 'input',
