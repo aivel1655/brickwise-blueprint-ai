@@ -37,16 +37,30 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Welcome message with enhanced features
+    // Welcome message with enhanced workflow features
     const welcomeMessage: ChatMessage = {
       id: 'welcome',
       type: 'agent',
       agent: 'iteration',
-      content: `Welcome to MultiBuildAgent! 🏗️\n\nI'm your AI construction assistant, powered by professional templates and intelligent planning. I can help you build:\n\n• 🧱 Walls & garden boundaries\n• 🍕 Pizza ovens & fire pits\n• 🏠 Foundations & structures\n\nJust tell me what you want to build, and I'll create a comprehensive plan with:\n• Step-by-step instructions\n• Material calculations with costs\n• Safety guidelines\n• Experience-level adaptations\n\nWhat would you like to build today?`,
+      content: `Welcome to MultiBuildAgent 2.0! 🏗️✨\n\nI'm your enhanced AI construction assistant, now powered by the Complete Workflow Engine and Groq Cloud AI. I can help you build:\n\n• 🧱 Walls & garden boundaries\n• 🍕 Pizza ovens & fire pits\n• 🏠 Foundations & structures\n\n**New in 2.0:**\n• 🤖 AI-powered construction expert advice\n• 🔄 Advanced conversation management\n• 💾 Session persistence & recovery\n• 🎯 Intelligent agent routing\n• 📊 Real-time workflow monitoring\n\nJust tell me what you want to build, and I'll create a professional plan with AI-enhanced insights!\n\n*Tip: Configure AI settings in the Options tab for enhanced features.*`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
+    
+    // Check workflow engine status
+    checkWorkflowEngineStatus();
   }, []);
+
+  const checkWorkflowEngineStatus = () => {
+    try {
+      const sessionInfo = agentService.getSessionInfo();
+      setWorkflowEngineEnabled(true); // Workflow engine is always enabled
+      console.log('Workflow Engine Status:', sessionInfo);
+    } catch (error) {
+      console.error('Error checking workflow engine:', error);
+      setWorkflowEngineEnabled(false);
+    }
+  };
 
   const handleSendMessage = async (content: string) => {
     const userMessage: ChatMessage = {
