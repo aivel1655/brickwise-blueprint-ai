@@ -159,6 +159,33 @@ const Index = () => {
 
           {/* Right Panel - Enhanced Project View */}
           <div className="xl:col-span-2 space-y-6">
+            {/* Enhanced Status Bar */}
+            {workflowEngineEnabled && (
+              <Card className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                        <Zap className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-800 dark:text-green-200">
+                          Enhanced Workflow Engine Active
+                        </h4>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          Advanced conversation management with AI integration ready
+                        </p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-500 text-white">
+                      <Bot className="w-3 h-3 mr-1" />
+                      Active
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Project Stats Cards */}
             {stats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
