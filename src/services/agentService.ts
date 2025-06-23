@@ -521,6 +521,21 @@ class AgentService {
     return this.catalogAgent;
   }
 
+  // Get planning agent for direct access
+  getPlanningAgent(): PlanningAgent {
+    return this.planningAgent;
+  }
+
+  // Get available build templates
+  getAvailableTemplates() {
+    return this.planningAgent.getAvailableTemplates();
+  }
+
+  // Get difficulty assessment for a project
+  getDifficultyAssessment(buildType: string, experienceLevel: string) {
+    return this.planningAgent.getDifficultyAssessment(buildType, experienceLevel);
+  }
+
   // Get material alternatives for a specific material
   getMaterialAlternatives(materialId: string) {
     return this.catalogAgent.getAlternatives(materialId);
