@@ -243,7 +243,7 @@ const Index = () => {
             <div className="bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 rounded-lg shadow-lg flex flex-col flex-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
                 <div className="border-b border-gray-200 dark:border-gray-700 px-6 pt-4">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="chat" className="flex items-center gap-2">
                       <MessageSquare className="w-4 h-4" />
                       <span className="hidden sm:inline">Chat</span>
@@ -257,7 +257,12 @@ const Index = () => {
                       <BarChart3 className="w-4 h-4" />
                       <span className="hidden sm:inline">Progress</span>
                     </TabsTrigger>
-                    <TabsTrigger value="alternatives" className="flex items-center gap-2">
+                    <TabsTrigger value="workflow" className="flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      <span className="hidden sm:inline">Workflow</span>
+                      {workflowEngineEnabled && <Badge variant="secondary" className="ml-1 h-5 text-xs">2.0</Badge>}
+                    </TabsTrigger>
+                    <TabsTrigger value="options" className="flex items-center gap-2">
                       <Settings className="w-4 h-4" />
                       <span className="hidden sm:inline">Options</span>
                     </TabsTrigger>
