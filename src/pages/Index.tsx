@@ -29,6 +29,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [currentPhase, setCurrentPhase] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [workflowEngineEnabled, setWorkflowEngineEnabled] = useState(false);
 
   const user = {
     name: 'Max Mustermann',
