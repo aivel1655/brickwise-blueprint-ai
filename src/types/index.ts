@@ -103,3 +103,36 @@ export interface AgentResponse {
   data?: any;
   suggestions?: string[];
 }
+
+// Enhanced Input Agent Interfaces
+export interface ParsedRequest {
+  buildType: 'wall' | 'foundation' | 'structure' | 'pizza_oven' | 'garden_wall' | 'fire_pit' | 'unknown';
+  dimensions: { 
+    length?: number; 
+    height?: number; 
+    width?: number; 
+    diameter?: number;
+  };
+  materials: string[];
+  constraints: string[];
+  confidence: number;
+  urgency?: 'low' | 'medium' | 'high';
+  budget?: number;
+  experience?: 'beginner' | 'intermediate' | 'expert';
+}
+
+export interface Question {
+  type: 'dimensions' | 'materials' | 'budget' | 'experience' | 'clarification';
+  text: string;
+  required: boolean;
+  suggestions?: string[];
+}
+
+export interface ConversationState {
+  phase: 'input' | 'clarification' | 'planning' | 'review' | 'complete';
+  messages: ChatMessage[];
+  currentPlan: BuildPlan | null;
+  needsInput: boolean;
+  parsedRequest?: ParsedRequest;
+  pendingQuestions?: Question[];
+}
