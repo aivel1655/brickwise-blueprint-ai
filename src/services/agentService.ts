@@ -117,7 +117,7 @@ class AgentService {
     return message;
   }
 
-  // Keep existing methods but update them to use parsed data
+  // Enhanced strategic planner using PlanningAgent templates
   private strategicPlannerResponse(): AgentResponse {
     const parsed = this.conversationState.parsedRequest;
     
@@ -126,26 +126,55 @@ class AgentService {
     }
     
     try {
+      // Get difficulty assessment first
+      const difficultyAssessment = this.planningAgent.getDifficultyAssessment(
+        parsed.buildType, 
+        parsed.experience || 'beginner'
+      );
+
       // Use MockCatalogAgent to calculate materials
       const materials = this.catalogAgent.calculateMaterialNeeds(parsed.buildType, parsed.dimensions);
       
-      // Create enhanced blueprint using calculated materials
-      const blueprint = this.createEnhancedBlueprint(parsed, materials);
+      // Create enhanced blueprint using PlanningAgent templates
+      const enhancedBlueprint = this.planningAgent.createStructuredPlan(parsed, materials);
       
       this.conversationState.phase = 'review';
       
+      // Create response message with difficulty assessment
+      let message = `I've created a comprehensive blueprint for your ${parsed.buildType.replace('_', ' ')} project using our template system.\n\n`;
+      
+      message += `**Project Assessment:**\n`;
+      message += `• Difficulty: ${enhancedBlueprint.difficulty}\n`;
+      message += `• Estimated Time: ${enhancedBlueprint.estimatedTime}\n`;
+      message += `• Total Cost: €${materials.totalCost.toFixed(2)}\n`;
+      message += `• Suitability: ${difficultyAssessment.suitable ? '✅ Well-suited for your level' : '⚠️ May be challenging'}\n\n`;
+      
+      message += `**What's Included:**\n`;
+      message += `• ${enhancedBlueprint.phases.length} detailed construction phases\n`;
+      message += `• ${enhancedBlueprint.detailedSteps.length} step-by-step instructions\n`;
+      message += `• ${enhancedBlueprint.safetyGuidelines.length} safety guidelines\n`;
+      message += `• ${enhancedBlueprint.qualityChecks.length} quality checks\n`;
+      message += `• ${enhancedBlueprint.troubleshooting.length} troubleshooting guides\n\n`;
+      
+      if (!difficultyAssessment.suitable) {
+        message += `💡 **Recommendation:** ${difficultyAssessment.recommendation}\n\n`;
+      }
+      
+      message += `The plan includes experience-level adapted instructions and safety guidelines tailored for ${parsed.experience || 'beginner'} builders.`;
+      
       return {
         agent: 'planner',
-        message: `I've created a comprehensive blueprint for your ${parsed.buildType.replace('_', ' ')} project using our material catalog. Here's the strategic plan with accurate material calculations, costs, and delivery estimates.`,
+        message: message,
         data: { 
-          blueprint, 
+          blueprint: enhancedBlueprint,
           parsedRequest: parsed,
           materialCalculation: materials,
-          catalogUsed: true
+          difficultyAssessment: difficultyAssessment,
+          templateUsed: true
         }
       };
     } catch (error) {
-      console.error('Error calculating materials:', error);
+      console.error('Error creating template-based plan:', error);
       return this.fallbackPlannerResponse();
     }
   }
