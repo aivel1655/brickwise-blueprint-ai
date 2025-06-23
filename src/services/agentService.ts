@@ -1,26 +1,15 @@
 
 import { AgentResponse, ProjectSpecs, Blueprint, BuildPlan, ParsedRequest, Question, ConversationState, MaterialCalculation, EnhancedBlueprint } from '../types';
-import { InputAgent } from './InputAgent';
-import { MockCatalogAgent } from './MockCatalogAgent';
-import { PlanningAgent } from './PlanningAgent';
+import { WorkflowEngine } from './WorkflowEngine';
 
 class AgentService {
-  private inputAgent: InputAgent;
-  private catalogAgent: MockCatalogAgent;
-  private planningAgent: PlanningAgent;
-  private conversationState: ConversationState;
+  private workflowEngine: WorkflowEngine;
   private projectSpecs: Partial<ProjectSpecs> = {};
 
   constructor() {
-    this.inputAgent = new InputAgent();
-    this.catalogAgent = new MockCatalogAgent();
-    this.planningAgent = new PlanningAgent(this.catalogAgent);
-    this.conversationState = {
-      phase: 'input',
-      messages: [],
-      currentPlan: null,
-      needsInput: true
-    };
+    this.workflowEngine = new WorkflowEngine({
+      enablePersistence: true
+    });
   }
 
   async processUserMessage(message: string, context?: any): Promise<AgentResponse> {
