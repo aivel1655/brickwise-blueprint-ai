@@ -61,6 +61,66 @@ export interface Material {
   inStock: boolean;
 }
 
+// Enhanced Material for Catalog
+export interface EnhancedMaterial {
+  id: string;
+  name: string;
+  category: 'brick' | 'mortar' | 'tool' | 'accessory' | 'foundation' | 'insulation';
+  price: number;
+  unit: string;
+  specifications: {
+    dimensions?: { length: number; width: number; height: number };
+    weight?: number;
+    coverage?: string;
+    strength?: string;
+    heatResistance?: string;
+    waterResistance?: string;
+  };
+  compatibility: string[]; // Works with these build types
+  alternatives: string[]; // Alternative material IDs
+  inStock: boolean;
+  description: string;
+  supplier?: string;
+  leadTime?: string;
+}
+
+// Material Calculation Result
+export interface MaterialCalculation {
+  materials: MaterialCalculationItem[];
+  totalCost: number;
+  deliveryTime: string;
+  wasteFactorApplied: number;
+  buildType: string;
+  estimatedQuantities: {
+    [materialId: string]: {
+      baseQuantity: number;
+      wasteQuantity: number;
+      finalQuantity: number;
+    };
+  };
+}
+
+export interface MaterialCalculationItem {
+  material: EnhancedMaterial;
+  quantity: number;
+  totalCost: number;
+  wasteIncluded: boolean;
+  notes?: string;
+}
+
+// Calculation Rules for Different Build Types
+export interface CalculationRules {
+  [buildType: string]: {
+    bricksPerSqm?: number;
+    mortarBagsPerSqm?: number;
+    foundationConcretePerCubicM?: number;
+    insulationPerSqm?: number;
+    wasteFactor: number;
+    toolsRequired: string[];
+    additionalMaterials?: { [materialId: string]: number }; // Fixed quantities
+  };
+}
+
 export interface Alternative {
   id: string;
   name: string;
