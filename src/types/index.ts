@@ -196,3 +196,102 @@ export interface ConversationState {
   parsedRequest?: ParsedRequest;
   pendingQuestions?: Question[];
 }
+
+// Planning Agent Template System
+export interface BuildTemplate {
+  id: string;
+  buildType: string;
+  name: string;
+  description: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  estimatedTimeRange: { min: number; max: number }; // in days
+  phases: TemplatePhase[];
+  safetyGuidelines: SafetyGuideline[];
+  experienceAdaptations: ExperienceAdaptation[];
+  toolRequirements: ToolRequirement[];
+  materialCategories: string[];
+  prerequisites?: string[];
+}
+
+export interface TemplatePhase {
+  id: string;
+  name: string;
+  description: string;
+  order: number;
+  estimatedDuration: { min: number; max: number }; // in hours
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  materialCategories: string[];
+  requiredTools: string[];
+  steps: TemplateStep[];
+  safetyNotes: string[];
+  experienceNotes: {
+    beginner?: string[];
+    intermediate?: string[];
+    expert?: string[];
+  };
+}
+
+export interface TemplateStep {
+  id: string;
+  stepNumber: number;
+  title: string;
+  description: string;
+  estimatedTime: number; // in minutes
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  requiredMaterials: string[]; // material IDs from catalog
+  requiredTools: string[];
+  safetyWarnings?: string[];
+  tips: {
+    general: string[];
+    beginner?: string[];
+    intermediate?: string[];
+    expert?: string[];
+  };
+  commonMistakes?: string[];
+  qualityChecks: string[];
+}
+
+export interface SafetyGuideline {
+  id: string;
+  category: 'PPE' | 'Tools' | 'Materials' | 'Environment' | 'Emergency';
+  title: string;
+  description: string;
+  severity: 'Info' | 'Warning' | 'Critical';
+  applicablePhases: string[]; // phase IDs
+}
+
+export interface ExperienceAdaptation {
+  experienceLevel: 'beginner' | 'intermediate' | 'expert';
+  timeMultiplier: number; // multiply base time estimates
+  additionalSteps?: string[];
+  simplifications?: string[];
+  additionalTools?: string[];
+  additionalSafety?: string[];
+}
+
+export interface ToolRequirement {
+  category: 'Essential' | 'Recommended' | 'Optional';
+  tools: string[]; // tool IDs from catalog
+  alternatives?: { [toolId: string]: string[] };
+  experienceLevel?: 'beginner' | 'intermediate' | 'expert';
+}
+
+// Enhanced Blueprint with Template Data
+export interface EnhancedBlueprint extends Blueprint {
+  templateId: string;
+  experienceLevel: 'beginner' | 'intermediate' | 'expert';
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  safetyGuidelines: SafetyGuideline[];
+  detailedSteps: TemplateStep[];
+  qualityChecks: string[];
+  troubleshooting: TroubleshootingGuide[];
+}
+
+export interface TroubleshootingGuide {
+  id: string;
+  problem: string;
+  symptoms: string[];
+  solutions: string[];
+  prevention: string[];
+  experienceLevel?: 'beginner' | 'intermediate' | 'expert';
+}
