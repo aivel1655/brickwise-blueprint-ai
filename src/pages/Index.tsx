@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import EnhancedChatInterface from '../components/ChatInterface';
 import EnhancedPlanPreview from '../components/EnhancedPlanPreview';
-import ProjectTabs from '../components/ProjectTabs';
+import EnhancedWorkflowInterface from '../components/EnhancedWorkflowInterface';
 import { ChatMessage, EnhancedBlueprint } from '../types';
 import { agentService } from '../services/agentService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,9 @@ import {
   Lightbulb,
   CheckCircle,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Bot,
+  Zap
 } from 'lucide-react';
 
 const Index = () => {
