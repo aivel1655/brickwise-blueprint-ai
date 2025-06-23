@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,31 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Construction-themed colors
+				brick: {
+					50: '#fef7f0',
+					100: '#feeee0',
+					200: '#fdd9c0',
+					300: '#fab895',
+					400: '#f6956b',
+					500: '#f2744a',
+					600: '#e35d3a',
+					700: '#c44831',
+					800: '#a03a2e',
+					900: '#82312a',
+				},
+				mortar: {
+					50: '#f8f9fa',
+					100: '#e9ecef',
+					200: '#dee2e6',
+					300: '#ced4da',
+					400: '#adb5bd',
+					500: '#6c757d',
+					600: '#495057',
+					700: '#343a40',
+					800: '#212529',
+					900: '#0d1117',
 				}
 			},
 			borderRadius: {
@@ -84,11 +110,27 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'slide-in-right': {
+					'0%': { transform: 'translateX(100%)' },
+					'100%': { transform: 'translateX(0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-in-right': 'slide-in-right 0.3s ease-out'
 			}
 		}
 	},
