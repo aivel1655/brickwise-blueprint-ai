@@ -25,33 +25,37 @@ const ProjectTabs: React.FC<ProjectTabsProps> = ({ activeProject }) => {
         <TabsContent value="alternatives" className="mt-4">
           <div className="space-y-4">
             {!showContent ? (
-              <div className="text-center text-gray-500 py-8">
+              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 text-orange-800 dark:text-orange-200">Demo</h3>
                 <div 
-                  className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-4 rounded-lg transition-colors"
+                  className="cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-800/30 p-4 rounded-lg transition-colors border border-orange-300 dark:border-orange-600"
                   onClick={handleDemoClick}
                 >
-                  <p className="mb-2">I want to build a pizza oven</p>
-                  <p className="text-sm mt-2">How big should the oven be?</p>
-                  <p className="text-sm mt-1">About 1 meter * 1 meter</p>
-                  <p className="text-xs text-orange-500 mt-4">Click to see chatbot response</p>
+                  <p className="text-orange-700 dark:text-orange-300 mb-2">I want to build a pizza oven</p>
+                  <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">How big should the oven be?</p>
+                  <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">About 1 meter * 1 meter</p>
+                  <p className="text-xs text-orange-500 mt-4 font-medium">Click to see chatbot response</p>
                 </div>
               </div>
             ) : (
               <>
-                <div className="space-y-3">
-                  <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                    <p className="text-sm font-medium">You:</p>
-                    <p className="text-sm">I want to build a pizza oven</p>
-                  </div>
-                  
-                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Agent:</p>
-                    <p className="text-sm text-blue-800 dark:text-blue-200">How big should the oven be?</p>
-                  </div>
-                  
-                  <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                    <p className="text-sm font-medium">You:</p>
-                    <p className="text-sm">About 1 meter * 1 meter</p>
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold mb-4 text-orange-800 dark:text-orange-200">Demo</h3>
+                  <div className="space-y-3">
+                    <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                      <p className="text-sm font-medium">You:</p>
+                      <p className="text-sm">I want to build a pizza oven</p>
+                    </div>
+                    
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Agent:</p>
+                      <p className="text-sm text-blue-800 dark:text-blue-200">How big should the oven be?</p>
+                    </div>
+                    
+                    <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                      <p className="text-sm font-medium">You:</p>
+                      <p className="text-sm">About 1 meter * 1 meter</p>
+                    </div>
                   </div>
                 </div>
                 
