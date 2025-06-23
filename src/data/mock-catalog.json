@@ -1,0 +1,308 @@
+{
+  "materials": [
+    {
+      "id": "brick-red-standard",
+      "name": "Standard Red Brick",
+      "category": "brick",
+      "price": 0.45,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 215, "width": 102.5, "height": 65 },
+        "weight": 2.5,
+        "strength": "Class B",
+        "waterResistance": "Standard"
+      },
+      "compatibility": ["wall", "garden_wall", "structure"],
+      "alternatives": ["brick-red-premium", "brick-yellow-standard"],
+      "inStock": true,
+      "description": "Standard clay brick suitable for general construction",
+      "supplier": "BuildCorp",
+      "leadTime": "2-3 days"
+    },
+    {
+      "id": "brick-red-premium",
+      "name": "Premium Red Brick",
+      "category": "brick",
+      "price": 0.65,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 215, "width": 102.5, "height": 65 },
+        "weight": 2.5,
+        "strength": "Class A",
+        "waterResistance": "High"
+      },
+      "compatibility": ["wall", "garden_wall", "structure"],
+      "alternatives": ["brick-red-standard", "brick-yellow-premium"],
+      "inStock": true,
+      "description": "Premium clay brick with enhanced durability",
+      "supplier": "BuildCorp",
+      "leadTime": "3-5 days"
+    },
+    {
+      "id": "firebrick-standard",
+      "name": "Standard Firebrick",
+      "category": "brick",
+      "price": 10.00,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 230, "width": 114, "height": 76 },
+        "weight": 4.2,
+        "strength": "Refractory Grade",
+        "heatResistance": "1200°C"
+      },
+      "compatibility": ["pizza_oven", "fire_pit"],
+      "alternatives": ["firebrick-premium"],
+      "inStock": true,
+      "description": "Refractory brick for high-temperature applications",
+      "supplier": "FireMaster",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "firebrick-premium",
+      "name": "Premium Firebrick Set",
+      "category": "brick",
+      "price": 12.50,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 230, "width": 114, "height": 76 },
+        "weight": 4.2,
+        "strength": "High Refractory Grade",
+        "heatResistance": "1400°C"
+      },
+      "compatibility": ["pizza_oven", "fire_pit"],
+      "alternatives": ["firebrick-standard"],
+      "inStock": true,
+      "description": "Premium refractory brick for extreme temperatures",
+      "supplier": "FireMaster",
+      "leadTime": "2-3 days"
+    },
+    {
+      "id": "mortar-standard",
+      "name": "General Purpose Mortar",
+      "category": "mortar",
+      "price": 12.50,
+      "unit": "bag",
+      "specifications": {
+        "weight": 25,
+        "coverage": "1m² at 10mm thickness",
+        "strength": "M4 Grade"
+      },
+      "compatibility": ["wall", "garden_wall", "structure"],
+      "alternatives": ["mortar-waterproof", "mortar-rapid-set"],
+      "inStock": true,
+      "description": "Standard mortar for general bricklaying",
+      "supplier": "MortarCorp",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "mortar-refractory",
+      "name": "Refractory Mortar",
+      "category": "mortar",
+      "price": 15.80,
+      "unit": "bag",
+      "specifications": {
+        "weight": 25,
+        "coverage": "0.8m² at 10mm thickness",
+        "strength": "High Temperature",
+        "heatResistance": "1200°C"
+      },
+      "compatibility": ["pizza_oven", "fire_pit"],
+      "alternatives": ["mortar-high-temp"],
+      "inStock": true,
+      "description": "Heat-resistant mortar for high-temperature applications",
+      "supplier": "FireMaster",
+      "leadTime": "2-3 days"
+    },
+    {
+      "id": "mortar-waterproof",
+      "name": "Waterproof Mortar",
+      "category": "mortar",
+      "price": 18.20,
+      "unit": "bag",
+      "specifications": {
+        "weight": 25,
+        "coverage": "1m² at 10mm thickness",
+        "strength": "M6 Grade",
+        "waterResistance": "Excellent"
+      },
+      "compatibility": ["wall", "garden_wall", "foundation"],
+      "alternatives": ["mortar-standard"],
+      "inStock": true,
+      "description": "Waterproof mortar for exterior applications",
+      "supplier": "MortarCorp",
+      "leadTime": "2-4 days"
+    },
+    {
+      "id": "concrete-standard",
+      "name": "Standard Concrete Mix",
+      "category": "foundation",
+      "price": 8.50,
+      "unit": "bag",
+      "specifications": {
+        "weight": 40,
+        "coverage": "0.02m³ per bag",
+        "strength": "C20/25"
+      },
+      "compatibility": ["foundation", "structure"],
+      "alternatives": ["concrete-rapid-set"],
+      "inStock": true,
+      "description": "General purpose concrete for foundations",
+      "supplier": "ConcreteCorp",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "concrete-rapid-set",
+      "name": "Rapid Set Concrete",
+      "category": "foundation",
+      "price": 11.20,
+      "unit": "bag",
+      "specifications": {
+        "weight": 40,
+        "coverage": "0.02m³ per bag",
+        "strength": "C25/30"
+      },
+      "compatibility": ["foundation", "structure"],
+      "alternatives": ["concrete-standard"],
+      "inStock": true,
+      "description": "Fast-setting concrete for quick projects",
+      "supplier": "ConcreteCorp",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "rebar-standard",
+      "name": "Standard Rebar",
+      "category": "foundation",
+      "price": 4.20,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 3000, "width": 12, "height": 12 },
+        "weight": 3.5,
+        "strength": "Grade 500"
+      },
+      "compatibility": ["foundation", "structure"],
+      "alternatives": ["rebar-galvanized"],
+      "inStock": true,
+      "description": "Standard reinforcement bar for concrete",
+      "supplier": "SteelCorp",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "insulation-standard",
+      "name": "Standard Insulation",
+      "category": "insulation",
+      "price": 25.00,
+      "unit": "m²",
+      "specifications": {
+        "dimensions": { "length": 1200, "width": 600, "height": 100 },
+        "weight": 1.2,
+        "heatResistance": "R-value 2.5"
+      },
+      "compatibility": ["pizza_oven", "structure"],
+      "alternatives": ["insulation-high-temp"],
+      "inStock": true,
+      "description": "Standard thermal insulation",
+      "supplier": "InsulCorp",
+      "leadTime": "2-3 days"
+    },
+    {
+      "id": "trowel-pointing",
+      "name": "Pointing Trowel",
+      "category": "tool",
+      "price": 15.99,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 150, "width": 25, "height": 10 },
+        "weight": 0.3
+      },
+      "compatibility": ["wall", "garden_wall", "pizza_oven", "fire_pit", "structure"],
+      "alternatives": ["trowel-brick", "trowel-margin"],
+      "inStock": true,
+      "description": "Precision pointing trowel for mortar work",
+      "supplier": "ToolCorp",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "level-spirit",
+      "name": "Spirit Level",
+      "category": "tool",
+      "price": 32.50,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 600, "width": 50, "height": 25 },
+        "weight": 0.8
+      },
+      "compatibility": ["wall", "garden_wall", "pizza_oven", "fire_pit", "structure", "foundation"],
+      "alternatives": ["level-laser"],
+      "inStock": true,
+      "description": "Precision spirit level for accurate alignment",
+      "supplier": "ToolCorp",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "mallet-rubber",
+      "name": "Rubber Mallet",
+      "category": "tool",
+      "price": 18.75,
+      "unit": "piece",
+      "specifications": {
+        "dimensions": { "length": 300, "width": 70, "height": 70 },
+        "weight": 0.6
+      },
+      "compatibility": ["wall", "garden_wall", "pizza_oven", "fire_pit", "structure"],
+      "alternatives": ["mallet-wooden"],
+      "inStock": true,
+      "description": "Rubber mallet for positioning bricks without damage",
+      "supplier": "ToolCorp",
+      "leadTime": "1-2 days"
+    }
+  ],
+  "calculationRules": {
+    "wall": {
+      "bricksPerSqm": 60,
+      "mortarBagsPerSqm": 0.04,
+      "wasteFactor": 1.1,
+      "toolsRequired": ["trowel-pointing", "level-spirit", "mallet-rubber"]
+    },
+    "garden_wall": {
+      "bricksPerSqm": 60,
+      "mortarBagsPerSqm": 0.04,
+      "wasteFactor": 1.15,
+      "toolsRequired": ["trowel-pointing", "level-spirit", "mallet-rubber"]
+    },
+    "pizza_oven": {
+      "bricksPerSqm": 25,
+      "mortarBagsPerSqm": 0.08,
+      "wasteFactor": 1.2,
+      "toolsRequired": ["trowel-pointing", "level-spirit", "mallet-rubber"],
+      "additionalMaterials": {
+        "insulation-standard": 2,
+        "concrete-standard": 3
+      }
+    },
+    "fire_pit": {
+      "bricksPerSqm": 30,
+      "mortarBagsPerSqm": 0.06,
+      "wasteFactor": 1.15,
+      "toolsRequired": ["trowel-pointing", "level-spirit", "mallet-rubber"]
+    },
+    "foundation": {
+      "foundationConcretePerCubicM": 50,
+      "wasteFactor": 1.1,
+      "toolsRequired": ["level-spirit"],
+      "additionalMaterials": {
+        "rebar-standard": 6
+      }
+    },
+    "structure": {
+      "bricksPerSqm": 65,
+      "mortarBagsPerSqm": 0.05,
+      "foundationConcretePerCubicM": 50,
+      "wasteFactor": 1.12,
+      "toolsRequired": ["trowel-pointing", "level-spirit", "mallet-rubber"],
+      "additionalMaterials": {
+        "concrete-standard": 4,
+        "rebar-standard": 8
+      }
+    }
+  }
+}
