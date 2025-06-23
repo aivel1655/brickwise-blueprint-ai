@@ -1,0 +1,454 @@
+{
+  "templates": [
+    {
+      "id": "template-wall",
+      "buildType": "wall",
+      "name": "Standard Brick Wall",
+      "description": "Build a sturdy brick wall suitable for boundaries, partitions, or structural purposes",
+      "difficulty": "Intermediate",
+      "estimatedTimeRange": { "min": 2, "max": 5 },
+      "phases": [
+        {
+          "id": "phase-wall-prep",
+          "name": "Site Preparation",
+          "description": "Prepare the foundation and mark the wall layout",
+          "order": 1,
+          "estimatedDuration": { "min": 120, "max": 240 },
+          "difficulty": "Easy",
+          "materialCategories": ["foundation"],
+          "requiredTools": ["level-spirit", "measuring-tape", "string-line"],
+          "steps": [
+            {
+              "id": "step-wall-1",
+              "stepNumber": 1,
+              "title": "Mark Wall Layout",
+              "description": "Use string lines and stakes to mark the exact position and alignment of the wall",
+              "estimatedTime": 30,
+              "difficulty": "Easy",
+              "requiredMaterials": [],
+              "requiredTools": ["measuring-tape", "string-line", "stakes"],
+              "tips": {
+                "general": ["Use a builder's square to ensure corners are 90 degrees", "Double-check all measurements before proceeding"],
+                "beginner": ["Take your time with measurements - accuracy here saves problems later", "Ask someone to help hold the measuring tape for better accuracy"],
+                "expert": ["Consider using a theodolite for long walls or slopes"]
+              },
+              "qualityChecks": ["String lines are taut and level", "Measurements match the plan", "Corners are square"]
+            },
+            {
+              "id": "step-wall-2",
+              "stepNumber": 2,
+              "title": "Excavate Foundation Trench",
+              "description": "Dig a trench for the foundation, typically 300mm deep and 100mm wider than the wall",
+              "estimatedTime": 90,
+              "difficulty": "Medium",
+              "requiredMaterials": [],
+              "requiredTools": ["spade", "pick", "wheelbarrow"],
+              "safetyWarnings": ["Check for underground utilities before digging", "Wear safety boots"],
+              "tips": {
+                "general": ["Keep the trench sides straight and level", "Set aside topsoil separately for reuse"],
+                "beginner": ["Dig in stages - don't try to do the full depth in one go", "Check depth regularly with a measuring stick"]
+              },
+              "commonMistakes": ["Making trench too narrow", "Not checking for level bottom"],
+              "qualityChecks": ["Trench is correct width and depth", "Bottom is level", "Sides are straight"]
+            }
+          ],
+          "safetyNotes": ["Wear safety boots when digging", "Check for underground cables/pipes before starting"],
+          "experienceNotes": {
+            "beginner": ["Take breaks frequently", "Don't rush the marking stage"],
+            "intermediate": ["Consider hiring a mini-digger for long walls"],
+            "expert": ["Use laser levels for improved accuracy"]
+          }
+        },
+        {
+          "id": "phase-wall-foundation",
+          "name": "Foundation Construction",
+          "description": "Pour and level the concrete foundation for the wall",
+          "order": 2,
+          "estimatedDuration": { "min": 180, "max": 300 },
+          "difficulty": "Medium",
+          "materialCategories": ["foundation"],
+          "requiredTools": ["level-spirit", "float", "wheelbarrow"],
+          "steps": [
+            {
+              "id": "step-wall-3",
+              "stepNumber": 3,
+              "title": "Mix and Pour Concrete",
+              "description": "Mix concrete to correct consistency and pour into the prepared trench",
+              "estimatedTime": 120,
+              "difficulty": "Medium",
+              "requiredMaterials": ["concrete-standard"],
+              "requiredTools": ["wheelbarrow", "shovel", "rake"],
+              "tips": {
+                "general": ["Pour concrete in sections for better control", "Work quickly once mixing starts"],
+                "beginner": ["Use ready-mix concrete for consistent results", "Have extra hands available for pouring"]
+              },
+              "qualityChecks": ["Concrete fills trench completely", "No air pockets visible", "Surface is roughly level"]
+            }
+          ],
+          "safetyNotes": ["Wear gloves when handling concrete", "Wash hands thoroughly after contact with cement"],
+          "experienceNotes": {
+            "beginner": ["Consider using ready-mix concrete for best results"]
+          }
+        },
+        {
+          "id": "phase-wall-construction",
+          "name": "Wall Construction",
+          "description": "Lay bricks course by course to build the wall",
+          "order": 3,
+          "estimatedDuration": { "min": 360, "max": 720 },
+          "difficulty": "Hard",
+          "materialCategories": ["brick", "mortar"],
+          "requiredTools": ["trowel-pointing", "level-spirit", "mallet-rubber"],
+          "steps": [
+            {
+              "id": "step-wall-4",
+              "stepNumber": 4,
+              "title": "Lay First Course",
+              "description": "Lay the first row of bricks on the foundation, checking level constantly",
+              "estimatedTime": 120,
+              "difficulty": "Hard",
+              "requiredMaterials": ["brick-red-standard", "mortar-standard"],
+              "requiredTools": ["trowel-pointing", "level-spirit", "string-line"],
+              "safetyWarnings": ["Keep fingers clear of mallet", "Lift bricks properly to avoid back strain"],
+              "tips": {
+                "general": ["Use a full mortar bed for the first course", "Check level every 3-4 bricks"],
+                "beginner": ["Place each brick carefully - removing set mortar is difficult", "Practice your mortar spreading technique first"],
+                "expert": ["Use ranging rods for long walls"]
+              },
+              "commonMistakes": ["Inadequate mortar coverage", "Not checking level frequently enough"],
+              "qualityChecks": ["All bricks are level", "Mortar joints are consistent", "Line is straight"]
+            }
+          ],
+          "safetyNotes": ["Lift bricks with proper technique", "Keep work area tidy to prevent trips"],
+          "experienceNotes": {
+            "beginner": ["Work slowly and check level frequently", "Don't be afraid to remove and re-lay bricks if needed"],
+            "intermediate": ["Develop a rhythm but don't sacrifice quality for speed"],
+            "expert": ["Consider pointing joints as you go for efficiency"]
+          }
+        }
+      ],
+      "safetyGuidelines": [
+        {
+          "id": "safety-wall-1",
+          "category": "PPE",
+          "title": "Personal Protective Equipment",
+          "description": "Safety boots, work gloves, safety glasses when cutting bricks",
+          "severity": "Critical",
+          "applicablePhases": ["phase-wall-prep", "phase-wall-foundation", "phase-wall-construction"]
+        },
+        {
+          "id": "safety-wall-2",
+          "category": "Tools",
+          "title": "Tool Safety",
+          "description": "Keep tools clean and in good condition. Check power tools before use.",
+          "severity": "Warning",
+          "applicablePhases": ["phase-wall-construction"]
+        }
+      ],
+      "experienceAdaptations": [
+        {
+          "experienceLevel": "beginner",
+          "timeMultiplier": 1.5,
+          "additionalSteps": ["Practice mortar spreading", "Practice brick laying technique"],
+          "additionalTools": ["string-guides", "practice-bricks"],
+          "additionalSafety": ["Work with experienced person if possible", "Take regular breaks"]
+        },
+        {
+          "experienceLevel": "intermediate",
+          "timeMultiplier": 1.0,
+          "simplifications": ["Can work at normal pace"]
+        },
+        {
+          "experienceLevel": "expert",
+          "timeMultiplier": 0.8,
+          "simplifications": ["Can use advanced techniques", "Can work more efficiently"]
+        }
+      ],
+      "toolRequirements": [
+        {
+          "category": "Essential",
+          "tools": ["trowel-pointing", "level-spirit", "mallet-rubber"],
+          "alternatives": {
+            "trowel-pointing": ["trowel-brick", "trowel-margin"]
+          }
+        },
+        {
+          "category": "Recommended",
+          "tools": ["string-line", "measuring-tape", "wheelbarrow"]
+        }
+      ],
+      "materialCategories": ["brick", "mortar", "foundation"],
+      "prerequisites": ["Basic understanding of masonry", "Physical fitness for lifting"]
+    },
+    {
+      "id": "template-pizza-oven",
+      "buildType": "pizza_oven",
+      "name": "Outdoor Pizza Oven",
+      "description": "Build a traditional wood-fired pizza oven for outdoor cooking",
+      "difficulty": "Advanced",
+      "estimatedTimeRange": { "min": 5, "max": 8 },
+      "phases": [
+        {
+          "id": "phase-oven-foundation",
+          "name": "Foundation & Base",
+          "description": "Create a strong, level foundation for the oven",
+          "order": 1,
+          "estimatedDuration": { "min": 240, "max": 360 },
+          "difficulty": "Medium",
+          "materialCategories": ["foundation"],
+          "requiredTools": ["level-spirit", "float", "wheelbarrow"],
+          "steps": [
+            {
+              "id": "step-oven-1",
+              "stepNumber": 1,
+              "title": "Build Foundation Slab",
+              "description": "Pour a reinforced concrete slab as the oven base",
+              "estimatedTime": 180,
+              "difficulty": "Medium",
+              "requiredMaterials": ["concrete-standard", "rebar-standard"],
+              "requiredTools": ["level-spirit", "float", "wheelbarrow"],
+              "tips": {
+                "general": ["Ensure foundation is perfectly level", "Use rebar for added strength"],
+                "beginner": ["Consider hiring professionals for foundation work", "Double-check all measurements"]
+              },
+              "qualityChecks": ["Foundation is level", "Concrete has proper thickness", "Rebar is properly positioned"]
+            }
+          ],
+          "safetyNotes": ["Wear safety boots", "Handle rebar carefully"],
+          "experienceNotes": {
+            "beginner": ["Foundation is critical - consider professional help"],
+            "expert": ["Can incorporate drainage systems"]
+          }
+        },
+        {
+          "id": "phase-oven-construction",
+          "name": "Oven Construction",
+          "description": "Build the fire chamber using firebricks",
+          "order": 2,
+          "estimatedDuration": { "min": 480, "max": 720 },
+          "difficulty": "Hard",
+          "materialCategories": ["brick", "mortar"],
+          "requiredTools": ["trowel-pointing", "level-spirit", "mallet-rubber"],
+          "steps": [
+            {
+              "id": "step-oven-2",
+              "stepNumber": 2,
+              "title": "Build Fire Chamber Floor",
+              "description": "Lay firebricks to create the oven floor",
+              "estimatedTime": 120,
+              "difficulty": "Hard",
+              "requiredMaterials": ["firebrick-standard", "sand"],
+              "requiredTools": ["level-spirit", "rubber-mallet"],
+              "tips": {
+                "general": ["Lay firebricks tightly together", "Use sand bed for leveling"],
+                "beginner": ["This is the most critical part - take your time", "Each brick must be perfectly level"]
+              },
+              "qualityChecks": ["All bricks are level and tight", "No gaps between bricks", "Surface is smooth"]
+            },
+            {
+              "id": "step-oven-3",
+              "stepNumber": 3,
+              "title": "Build Dome Walls",
+              "description": "Construct the dome-shaped walls of the oven",
+              "estimatedTime": 300,
+              "difficulty": "Hard",
+              "requiredMaterials": ["firebrick-standard", "mortar-refractory"],
+              "requiredTools": ["trowel-pointing", "template-dome"],
+              "safetyWarnings": ["Work carefully at height", "Ensure dome structure is stable"],
+              "tips": {
+                "general": ["Use a dome template for consistent shape", "Keep mortar joints thin"],
+                "beginner": ["Consider building in stages over multiple days"],
+                "expert": ["Can build without template using experience"]
+              },
+              "qualityChecks": ["Dome shape is consistent", "Mortar joints are thin and complete", "Structure is stable"]
+            }
+          ],
+          "safetyNotes": ["Work carefully with hot mortar", "Ensure good ventilation"],
+          "experienceNotes": {
+            "beginner": ["This is advanced work - consider professional help for dome construction"],
+            "expert": ["Can incorporate advanced features like thermometer placement"]
+          }
+        },
+        {
+          "id": "phase-oven-insulation",
+          "name": "Insulation & Finishing",
+          "description": "Add insulation and complete the oven exterior",
+          "order": 3,
+          "estimatedDuration": { "min": 240, "max": 360 },
+          "difficulty": "Medium",
+          "materialCategories": ["insulation"],
+          "requiredTools": ["knife", "trowel"],
+          "steps": [
+            {
+              "id": "step-oven-4",
+              "stepNumber": 4,
+              "title": "Apply Insulation Layer",
+              "description": "Cover the dome with insulation material",
+              "estimatedTime": 120,
+              "difficulty": "Medium",
+              "requiredMaterials": ["insulation-standard"],
+              "requiredTools": ["knife", "trowel"],
+              "tips": {
+                "general": ["Cover dome completely", "Ensure insulation is thick enough"],
+                "beginner": ["Work methodically to ensure complete coverage"]
+              },
+              "qualityChecks": ["Complete coverage of dome", "Insulation thickness is consistent", "No gaps or thin spots"]
+            }
+          ],
+          "safetyNotes": ["Wear dust mask when cutting insulation"],
+          "experienceNotes": {
+            "beginner": ["Take care to avoid damaging the dome structure"]
+          }
+        }
+      ],
+      "safetyGuidelines": [
+        {
+          "id": "safety-oven-1",
+          "category": "Materials",
+          "title": "High Temperature Materials",
+          "description": "Only use firebricks and refractory mortar for fire chamber",
+          "severity": "Critical",
+          "applicablePhases": ["phase-oven-construction"]
+        },
+        {
+          "id": "safety-oven-2",
+          "category": "Environment",
+          "title": "Heat Safety",
+          "description": "Allow proper curing time before first firing",
+          "severity": "Warning",
+          "applicablePhases": ["phase-oven-construction"]
+        }
+      ],
+      "experienceAdaptations": [
+        {
+          "experienceLevel": "beginner",
+          "timeMultiplier": 2.0,
+          "additionalSteps": ["Study dome construction techniques", "Practice with small test structures"],
+          "additionalSafety": ["Consider professional help for dome construction", "Work with experienced builder"]
+        },
+        {
+          "experienceLevel": "intermediate",
+          "timeMultiplier": 1.3,
+          "additionalSteps": ["Create dome template"]
+        },
+        {
+          "experienceLevel": "expert",
+          "timeMultiplier": 1.0
+        }
+      ],
+      "toolRequirements": [
+        {
+          "category": "Essential",
+          "tools": ["trowel-pointing", "level-spirit", "mallet-rubber"],
+          "experienceLevel": "beginner"
+        },
+        {
+          "category": "Recommended",
+          "tools": ["dome-template", "thermometer"],
+          "experienceLevel": "intermediate"
+        }
+      ],
+      "materialCategories": ["brick", "mortar", "foundation", "insulation"],
+      "prerequisites": ["Advanced masonry skills", "Understanding of dome construction", "Physical strength"]
+    },
+    {
+      "id": "template-garden-wall",
+      "buildType": "garden_wall",
+      "name": "Garden Boundary Wall",
+      "description": "Build a decorative and functional garden wall for boundaries and landscaping",
+      "difficulty": "Beginner",
+      "estimatedTimeRange": { "min": 1, "max": 3 },
+      "phases": [
+        {
+          "id": "phase-garden-prep",
+          "name": "Garden Preparation",
+          "description": "Prepare the area and plan the wall layout",
+          "order": 1,
+          "estimatedDuration": { "min": 60, "max": 120 },
+          "difficulty": "Easy",
+          "materialCategories": [],
+          "requiredTools": ["measuring-tape", "string-line"],
+          "steps": [
+            {
+              "id": "step-garden-1",
+              "stepNumber": 1,
+              "title": "Plan Wall Route",
+              "description": "Mark the exact path of the wall considering drainage and plants",
+              "estimatedTime": 60,
+              "difficulty": "Easy",
+              "requiredMaterials": [],
+              "requiredTools": ["measuring-tape", "spray-paint"],
+              "tips": {
+                "general": ["Consider water drainage", "Check property boundaries"],
+                "beginner": ["Start with a short, straight section", "Keep it simple for your first wall"]
+              },
+              "qualityChecks": ["Route is clearly marked", "Drainage is considered", "No underground utilities affected"]
+            }
+          ],
+          "safetyNotes": ["Check for underground utilities"],
+          "experienceNotes": {
+            "beginner": ["Start small - you can always extend later"]
+          }
+        },
+        {
+          "id": "phase-garden-build",
+          "name": "Wall Construction",
+          "description": "Build the garden wall with appropriate materials",
+          "order": 2,
+          "estimatedDuration": { "min": 180, "max": 360 },
+          "difficulty": "Easy",
+          "materialCategories": ["brick", "mortar"],
+          "requiredTools": ["trowel-pointing", "level-spirit"],
+          "steps": [
+            {
+              "id": "step-garden-2",
+              "stepNumber": 2,
+              "title": "Lay Foundation Course",
+              "description": "Lay the first course of bricks on a mortar bed",
+              "estimatedTime": 90,
+              "difficulty": "Easy",
+              "requiredMaterials": ["brick-red-standard", "mortar-waterproof"],
+              "requiredTools": ["trowel-pointing", "level-spirit"],
+              "tips": {
+                "general": ["Use waterproof mortar for ground contact", "Keep first course very level"],
+                "beginner": ["Take your time with the first course - it sets the standard for the rest"]
+              },
+              "qualityChecks": ["First course is level", "Mortar joints are consistent", "Bricks are properly aligned"]
+            }
+          ],
+          "safetyNotes": ["Wear gloves when handling mortar"],
+          "experienceNotes": {
+            "beginner": ["Garden walls are perfect for learning basic bricklaying skills"]
+          }
+        }
+      ],
+      "safetyGuidelines": [
+        {
+          "id": "safety-garden-1",
+          "category": "Environment",
+          "title": "Weather Considerations",
+          "description": "Don't work in rain or freezing conditions",
+          "severity": "Warning",
+          "applicablePhases": ["phase-garden-build"]
+        }
+      ],
+      "experienceAdaptations": [
+        {
+          "experienceLevel": "beginner",
+          "timeMultiplier": 1.3,
+          "additionalSteps": ["Practice mortar mixing", "Learn basic bricklaying technique"],
+          "additionalSafety": ["Work in good weather only", "Don't rush the learning process"]
+        }
+      ],
+      "toolRequirements": [
+        {
+          "category": "Essential",
+          "tools": ["trowel-pointing", "level-spirit"],
+          "experienceLevel": "beginner"
+        }
+      ],
+      "materialCategories": ["brick", "mortar"],
+      "prerequisites": ["Basic DIY skills"]
+    }
+  ]
+}
