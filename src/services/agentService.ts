@@ -1,17 +1,20 @@
 
-import { AgentResponse, ProjectSpecs, Blueprint, BuildPlan, ParsedRequest, Question, ConversationState, MaterialCalculation } from '../types';
+import { AgentResponse, ProjectSpecs, Blueprint, BuildPlan, ParsedRequest, Question, ConversationState, MaterialCalculation, EnhancedBlueprint } from '../types';
 import { InputAgent } from './InputAgent';
 import { MockCatalogAgent } from './MockCatalogAgent';
+import { PlanningAgent } from './PlanningAgent';
 
 class AgentService {
   private inputAgent: InputAgent;
   private catalogAgent: MockCatalogAgent;
+  private planningAgent: PlanningAgent;
   private conversationState: ConversationState;
   private projectSpecs: Partial<ProjectSpecs> = {};
 
   constructor() {
     this.inputAgent = new InputAgent();
     this.catalogAgent = new MockCatalogAgent();
+    this.planningAgent = new PlanningAgent(this.catalogAgent);
     this.conversationState = {
       phase: 'input',
       messages: [],
