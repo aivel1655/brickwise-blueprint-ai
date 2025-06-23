@@ -1,28 +1,45 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import ChatInterface from '../components/ChatInterface';
+import EnhancedChatInterface from '../components/ChatInterface';
+import EnhancedPlanPreview from '../components/EnhancedPlanPreview';
 import ProjectTabs from '../components/ProjectTabs';
-import { ChatMessage } from '../types';
+import { ChatMessage, EnhancedBlueprint } from '../types';
 import { agentService } from '../services/agentService';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  MessageSquare, 
+  FileText, 
+  BarChart3, 
+  Settings,
+  Lightbulb,
+  CheckCircle,
+  Clock,
+  AlertTriangle
+} from 'lucide-react';
 
 const Index = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentProject, setCurrentProject] = useState(null);
+  const [currentBlueprint, setCurrentBlueprint] = useState<EnhancedBlueprint | null>(null);
+  const [activeTab, setActiveTab] = useState('chat');
+  const [currentPhase, setCurrentPhase] = useState(0);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const user = {
     name: 'Max Mustermann',
-    avatar: undefined // Will show default icon
+    avatar: undefined
   };
 
   useEffect(() => {
-    // Welcome message
+    // Welcome message with enhanced features
     const welcomeMessage: ChatMessage = {
       id: 'welcome',
       type: 'agent',
       agent: 'iteration',
-      content: "Welcome to MultiBuildAgent! I'm here to help you plan and build brick structures. What would you like to build today?",
+      content: `Welcome to MultiBuildAgent! 🏗️\n\nI'm your AI construction assistant, powered by professional templates and intelligent planning. I can help you build:\n\n• 🧱 Walls & garden boundaries\n• 🍕 Pizza ovens & fire pits\n• 🏠 Foundations & structures\n\nJust tell me what you want to build, and I'll create a comprehensive plan with:\n• Step-by-step instructions\n• Material calculations with costs\n• Safety guidelines\n• Experience-level adaptations\n\nWhat would you like to build today?`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -38,10 +55,18 @@ const Index = () => {
 
     setMessages(prev => [...prev, userMessage]);
     setIsProcessing(true);
+    setSuggestions([]); // Clear suggestions when processing
 
     try {
-      // Simulate agent processing time
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Get conversation state to determine processing type
+      const conversationState = agentService.getConversationState();
+      let processingTime = 1500; // Default processing time
+
+      if (conversationState.phase === 'planning') {
+        processingTime = 3000; // Longer for plan generation
+      }
+
+      await new Promise(resolve => setTimeout(resolve, processingTime));
       
       const response = await agentService.processUserMessage(content, { messages });
       
@@ -55,12 +80,24 @@ const Index = () => {
       };
 
       setMessages(prev => [...prev, agentMessage]);
+
+      // Handle blueprint data
+      if (response.data?.blueprint) {
+        setCurrentBlueprint(response.data.blueprint);
+        setActiveTab('plan'); // Auto-switch to plan view when blueprint is ready
+      }
+
+      // Handle suggestions
+      if (response.suggestions) {
+        setSuggestions(response.suggestions);
+      }
+
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         type: 'agent',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: 'Sorry, I encountered an error processing your request. Please try again or rephrase your question.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -69,59 +106,244 @@ const Index = () => {
     }
   };
 
+  const handlePhaseClick = (phaseIndex: number) => {
+    setCurrentPhase(phaseIndex);
+  };
+
+  const getProjectStats = () => {
+    if (!currentBlueprint) return null;
+    
+    return {
+      totalSteps: currentBlueprint.detailedSteps.length,
+      completedSteps: Math.floor(currentBlueprint.detailedSteps.length * (currentPhase / currentBlueprint.phases.length)),
+      safetyItems: currentBlueprint.safetyGuidelines.length,
+      totalCost: currentBlueprint.totalCost
+    };
+  };
+
+  const stats = getProjectStats();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         <Header user={user} />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
           {/* Left Panel - Chat Interface */}
-          <div className="bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 rounded-lg shadow-lg flex flex-col">
-            <ChatInterface
+          <div className="xl:col-span-1 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 rounded-lg shadow-lg flex flex-col">
+            <EnhancedChatInterface
               messages={messages}
               onSendMessage={handleSendMessage}
               isProcessing={isProcessing}
+              currentBlueprint={currentBlueprint}
+              suggestions={suggestions}
             />
           </div>
 
-          {/* Right Panel - Project Details */}
-          <div className="space-y-6">
-            <ProjectTabs activeProject={currentProject} />
-            
-            {/* Build Progress Visualization */}
-            <div className="bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Build Progress</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                    <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-200">Planning Phase</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Gathering requirements and specifications</p>
-                  </div>
-                </div>
+          {/* Right Panel - Enhanced Project View */}
+          <div className="xl:col-span-2 space-y-6">
+            {/* Project Stats Cards */}
+            {stats && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <div>
+                        <p className="text-2xl font-bold">{stats.completedSteps}/{stats.totalSteps}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Steps</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
                 
-                <div className="flex items-center gap-3 opacity-50">
-                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <div className="w-4 h-4 bg-gray-400 rounded"></div>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-500">Blueprint Creation</p>
-                    <p className="text-sm text-gray-400">Strategic planning and material estimation</p>
-                  </div>
-                </div>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="text-2xl font-bold">{currentBlueprint?.estimatedTime.split('-')[0] || '0'}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Days Min</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
                 
-                <div className="flex items-center gap-3 opacity-30">
-                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <div className="w-4 h-4 bg-gray-400 rounded"></div>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-400">Build Instructions</p>
-                    <p className="text-sm text-gray-400">Detailed step-by-step construction guide</p>
-                  </div>
-                </div>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                      <div>
+                        <p className="text-2xl font-bold">{stats.safetyItems}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Safety Items</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <p className="text-2xl font-bold">€{stats.totalCost.toFixed(0)}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Total Cost</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
+            )}
+
+            {/* Main Content Tabs */}
+            <div className="bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 rounded-lg shadow-lg flex flex-col flex-1">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+                <div className="border-b border-gray-200 dark:border-gray-700 px-6 pt-4">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="chat" className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      <span className="hidden sm:inline">Chat</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="plan" className="flex items-center gap-2" disabled={!currentBlueprint}>
+                      <FileText className="w-4 h-4" />
+                      <span className="hidden sm:inline">Plan</span>
+                      {currentBlueprint && <Badge variant="secondary" className="ml-1 h-5 text-xs">New</Badge>}
+                    </TabsTrigger>
+                    <TabsTrigger value="progress" className="flex items-center gap-2" disabled={!currentBlueprint}>
+                      <BarChart3 className="w-4 h-4" />
+                      <span className="hidden sm:inline">Progress</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="alternatives" className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      <span className="hidden sm:inline">Options</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <div className="flex-1 overflow-hidden">
+                  <TabsContent value="chat" className="h-full p-6">
+                    <Card className="h-full">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lightbulb className="w-5 h-5 text-yellow-500" />
+                          Chat Tips & Guidance
+                        </CardTitle>
+                        <CardDescription>
+                          Maximize your MultiBuildAgent experience
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">🎯 Be Specific</h4>
+                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                              Include dimensions, materials, and your experience level for better plans
+                            </p>
+                          </div>
+                          
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <h4 className="font-medium text-green-800 dark:text-green-200 mb-1">💡 Ask Questions</h4>
+                            <p className="text-sm text-green-700 dark:text-green-300">
+                              Request alternatives, safety tips, or modifications to your plan
+                            </p>
+                          </div>
+                          
+                          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <h4 className="font-medium text-purple-800 dark:text-purple-200 mb-1">🔧 Experience Matters</h4>
+                            <p className="text-sm text-purple-700 dark:text-purple-300">
+                              Mention if you're a beginner, intermediate, or expert for tailored instructions
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <h4 className="font-medium mb-2">Example Requests:</h4>
+                          <div className="space-y-2 text-sm">
+                            <p className="p-2 bg-gray-50 dark:bg-gray-800 rounded">"I want to build a 1.2m pizza oven, I'm a beginner"</p>
+                            <p className="p-2 bg-gray-50 dark:bg-gray-800 rounded">"Help me build a garden wall 3m long and 1.5m high"</p>
+                            <p className="p-2 bg-gray-50 dark:bg-gray-800 rounded">"What's the safest way to build a fire pit?"</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="plan" className="h-full p-6 overflow-y-auto">
+                    {currentBlueprint ? (
+                      <EnhancedPlanPreview
+                        blueprint={currentBlueprint}
+                        currentPhase={currentPhase}
+                        onPhaseClick={handlePhaseClick}
+                      />
+                    ) : (
+                      <Card className="h-full flex items-center justify-center">
+                        <CardContent>
+                          <div className="text-center">
+                            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No Plan Yet</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                              Start a conversation to generate your construction plan
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="progress" className="h-full p-6">
+                    {currentBlueprint ? (
+                      <div className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Construction Progress</CardTitle>
+                            <CardDescription>Track your project phases and milestones</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {currentBlueprint.phases.map((phase, index) => (
+                                <div key={phase.id} className="flex items-center gap-4">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                    index < currentPhase 
+                                      ? 'bg-green-500 text-white' 
+                                      : index === currentPhase 
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                                  }`}>
+                                    {index < currentPhase ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-medium">{phase.name}</h4>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{phase.duration}</p>
+                                  </div>
+                                  <Badge variant={index <= currentPhase ? 'default' : 'outline'}>
+                                    {index < currentPhase ? 'Complete' : index === currentPhase ? 'Current' : 'Upcoming'}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    ) : (
+                      <Card className="h-full flex items-center justify-center">
+                        <CardContent>
+                          <div className="text-center">
+                            <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No Progress to Track</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                              Generate a plan first to track your construction progress
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="alternatives" className="h-full p-6 overflow-y-auto">
+                    <ProjectTabs activeProject={currentBlueprint} />
+                  </TabsContent>
+                </div>
+              </Tabs>
             </div>
           </div>
         </div>
