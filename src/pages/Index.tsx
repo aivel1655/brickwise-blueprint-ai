@@ -388,8 +388,77 @@ const Index = () => {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="alternatives" className="h-full p-6 overflow-y-auto">
-                    <ProjectTabs activeProject={currentBlueprint} />
+                  <TabsContent value="workflow" className="h-full p-6 overflow-y-auto">
+                    <EnhancedWorkflowInterface />
+                  </TabsContent>
+
+                  <TabsContent value="options" className="h-full p-6 overflow-y-auto">
+                    <Card className="h-full">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-gray-500" />
+                          Project Options & Alternatives
+                        </CardTitle>
+                        <CardDescription>
+                          Explore alternatives and optimize your construction project
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {currentBlueprint ? (
+                          <div className="space-y-4">
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                              <h4 className="font-semibold mb-2">💡 Optimization Suggestions</h4>
+                              <ul className="text-sm space-y-1">
+                                <li>• Ask about material alternatives for cost savings</li>
+                                <li>• Request timeline optimization strategies</li>
+                                <li>• Inquire about safety improvements</li>
+                                <li>• Explore different construction techniques</li>
+                              </ul>
+                            </div>
+                            
+                            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                              <h4 className="font-semibold mb-2">🤖 AI-Enhanced Features</h4>
+                              <ul className="text-sm space-y-1">
+                                <li>• Configure AI settings in the Workflow tab</li>
+                                <li>• Get expert construction advice</li>
+                                <li>• Receive cost optimization recommendations</li>
+                                <li>• Access intelligent troubleshooting guides</li>
+                              </ul>
+                            </div>
+
+                            <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                              <h4 className="font-semibold mb-2">📊 Project Analytics</h4>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium">Complexity:</span>
+                                  <span className="ml-2">{currentBlueprint.difficulty}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Experience:</span>
+                                  <span className="ml-2 capitalize">{currentBlueprint.experienceLevel}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Materials:</span>
+                                  <span className="ml-2">{currentBlueprint.materials.length} items</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Safety Items:</span>
+                                  <span className="ml-2">{currentBlueprint.safetyGuidelines.length} guidelines</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No Active Project</h3>
+                            <p className="text-gray-600 dark:text-gray-400">
+                              Start a conversation to generate a construction plan and access optimization options
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </TabsContent>
                 </div>
               </Tabs>
