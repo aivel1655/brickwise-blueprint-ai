@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -41,12 +40,17 @@ export interface Blueprint {
 
 export interface BuildPhase {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
   description: string;
-  duration: string;
+  duration?: string;
   order: number;
-  materials: Material[];
-  tools: string[];
+  materials?: Material[];
+  tools?: string[];
+  estimatedHours?: number;
+  weatherDependent?: boolean;
+  skillLevel?: 'beginner' | 'intermediate' | 'advanced';
+  safetyPriority?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export interface Material {
@@ -150,11 +154,12 @@ export interface BuildStep {
 
 export interface ChatMessage {
   id: string;
-  type: 'user' | 'agent';
-  agent?: 'iteration' | 'planner' | 'builder' | 'joule';
+  type?: 'user' | 'agent';
   content: string;
   timestamp: Date;
   data?: any;
+  sender?: 'user' | 'assistant';
+  agent?: 'iteration' | 'planner' | 'builder' | 'joule';
 }
 
 export interface AgentResponse {
@@ -203,7 +208,7 @@ export interface BuildTemplate {
   buildType: string;
   name: string;
   description: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimatedTimeRange: { min: number; max: number }; // in days
   phases: TemplatePhase[];
   safetyGuidelines: SafetyGuideline[];
@@ -213,9 +218,14 @@ export interface BuildTemplate {
   prerequisites?: string[];
 }
 
+export interface EnhancedTemplate extends BuildTemplate {
+  estimatedHours?: number;
+}
+
 export interface TemplatePhase {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
   description: string;
   order: number;
   estimatedDuration: { min: number; max: number }; // in hours
@@ -229,6 +239,8 @@ export interface TemplatePhase {
     intermediate?: string[];
     expert?: string[];
   };
+  tools?: string[];
+  estimatedHours?: number;
 }
 
 export interface TemplateStep {
@@ -260,6 +272,14 @@ export interface SafetyGuideline {
   applicablePhases: string[]; // phase IDs
 }
 
+export interface QualityCheck {
+  id: string;
+  phase: string;
+  description: string;
+  criticalPath: boolean;
+  toolsRequired: string[];
+}
+
 export interface ExperienceAdaptation {
   experienceLevel: 'beginner' | 'intermediate' | 'expert';
   timeMultiplier: number; // multiply base time estimates
@@ -279,12 +299,23 @@ export interface ToolRequirement {
 // Enhanced Blueprint with Template Data
 export interface EnhancedBlueprint extends Blueprint {
   templateId: string;
+  buildType: string;
+  dimensions: { 
+    length?: number; 
+    height?: number; 
+    width?: number; 
+    diameter?: number;
+  };
   experienceLevel: 'beginner' | 'intermediate' | 'expert';
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   safetyGuidelines: SafetyGuideline[];
-  detailedSteps: TemplateStep[];
-  qualityChecks: string[];
-  troubleshooting: TroubleshootingGuide[];
+  qualityChecks: QualityCheck[];
+  detailedSteps?: TemplateStep[];
+  troubleshooting?: TroubleshootingGuide[];
+  tools: string[];
+  permits: string[];
+  weatherConsiderations: string[];
+  maintenanceSchedule: string[];
 }
 
 export interface TroubleshootingGuide {
@@ -294,4 +325,19 @@ export interface TroubleshootingGuide {
   solutions: string[];
   prevention: string[];
   experienceLevel?: 'beginner' | 'intermediate' | 'expert';
+}
+
+// Workflow Engine Types
+export type WorkflowPhase = 'input' | 'planning' | 'materials' | 'ai_analysis' | 'interactive';
+
+export interface WorkflowState {
+  phase: WorkflowPhase;
+  sessionId: string;
+  messageCount: number;
+  parsedRequest: ParsedRequest | null;
+  blueprint: EnhancedBlueprint | null;
+  materials: MaterialCalculation | null;
+  conversationHistory: ChatMessage[];
+  aiAnalysis: any | null;
+  lastError: string | null;
 }

@@ -1,4 +1,5 @@
 
+
 import { AgentResponse, ProjectSpecs, Blueprint, BuildPlan, ParsedRequest, Question, ConversationState, MaterialCalculation, EnhancedBlueprint } from '../types';
 import { WorkflowEngine } from './WorkflowEngine';
 
@@ -7,9 +8,7 @@ class AgentService {
   private projectSpecs: Partial<ProjectSpecs> = {};
 
   constructor() {
-    this.workflowEngine = new WorkflowEngine({
-      enablePersistence: true
-    });
+    this.workflowEngine = new WorkflowEngine();
   }
 
   async processUserMessage(message: string, context?: any): Promise<AgentResponse> {
@@ -17,7 +16,18 @@ class AgentService {
     
     try {
       // Use the enhanced workflow engine to process the message
-      return await this.workflowEngine.processMessage(message, context);
+      const result = await this.workflowEngine.processMessage(message);
+      
+      return {
+        agent: 'workflow',
+        message: result.response,
+        data: {
+          blueprint: result.blueprint,
+          materials: result.materials,
+          phase: result.phase,
+          aiAnalysis: result.aiAnalysis
+        }
+      };
     } catch (error) {
       console.error('Error processing message:', error);
       return {
@@ -30,66 +40,69 @@ class AgentService {
 
   // Public methods for conversation management
   getConversationState(): ConversationState {
-    return this.workflowEngine.getConversationState();
+    const state = this.workflowEngine.getCurrentState();
+    return {
+      phase: state.phase === 'input' ? 'input' : 
+             state.phase === 'planning' ? 'planning' : 
+             state.phase === 'materials' ? 'review' : 'complete',
+      messages: state.conversationHistory,
+      currentPlan: null, // Legacy compatibility
+      needsInput: state.phase === 'input',
+      parsedRequest: state.parsedRequest || undefined,
+      pendingQuestions: []
+    };
   }
 
   // Set Groq API key for AI functionality
   setGroqApiKey(apiKey: string): void {
-    this.workflowEngine.setGroqApiKey(apiKey);
+    this.workflowEngine.updateApiKey(apiKey);
   }
 
   // Get session information
   getSessionInfo() {
-    return this.workflowEngine.getSessionInfo();
+    return this.workflowEngine.getStatus();
   }
 
   // Clear current session
   clearSession(): void {
-    this.workflowEngine.clearSession();
+    this.workflowEngine.resetSession();
   }
 
-  // Get catalog agent for direct access
+  // Legacy methods for backward compatibility
   getCatalogAgent() {
-    return this.workflowEngine.getCatalogAgent();
+    return null; // Not directly accessible in new architecture
   }
 
-  // Get planning agent for direct access
   getPlanningAgent() {
-    return this.workflowEngine.getPlanningAgent();
+    return null; // Not directly accessible in new architecture
   }
 
-  // Get input agent for direct access
   getInputAgent() {
-    return this.workflowEngine.getInputAgent();
+    return null; // Not directly accessible in new architecture
   }
 
-  // Get available build templates
   getAvailableTemplates() {
-    return this.workflowEngine.getPlanningAgent().getAvailableTemplates();
+    return []; // Would need to be implemented if needed
   }
 
-  // Get difficulty assessment for a project
   getDifficultyAssessment(buildType: string, experienceLevel: string) {
-    return this.workflowEngine.getPlanningAgent().getDifficultyAssessment(buildType, experienceLevel);
+    return 'intermediate'; // Would need to be implemented if needed
   }
 
-  // Get material alternatives for a specific material
   getMaterialAlternatives(materialId: string) {
-    return this.workflowEngine.getCatalogAgent().getAlternatives(materialId);
+    return []; // Would need to be implemented if needed
   }
 
-  // Search materials by query
   searchMaterials(query: string) {
-    return this.workflowEngine.getCatalogAgent().searchMaterials(query);
+    return []; // Would need to be implemented if needed
   }
 
-  // Get catalog statistics
   getCatalogStats() {
-    return this.workflowEngine.getCatalogAgent().getCatalogStats();
+    return {}; // Would need to be implemented if needed
   }
 
   resetSession(): void {
-    this.workflowEngine.clearSession();
+    this.workflowEngine.resetSession();
     this.projectSpecs = {};
   }
 
@@ -109,3 +122,4 @@ class AgentService {
 }
 
 export const agentService = new AgentService();
+

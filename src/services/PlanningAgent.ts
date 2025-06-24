@@ -1,3 +1,4 @@
+
 import { 
   ParsedRequest, 
   EnhancedBlueprint,
@@ -21,7 +22,7 @@ export class PlanningAgent {
 
     // Get base template
     const template = this.findBestTemplate(request);
-    const materials = await this.catalogAgent.calculateMaterials(request);
+    const materials = await this.catalogAgent.calculateMaterialNeeds(request);
     
     // Calculate enhanced properties
     const difficulty = this.calculateDifficulty(request, template);
@@ -53,7 +54,8 @@ export class PlanningAgent {
   }
 
   private findBestTemplate(request: ParsedRequest): EnhancedTemplate {
-    const templates = buildTemplates as EnhancedTemplate[];
+    const templatesData = buildTemplates as { templates: any[] };
+    const templates = templatesData.templates as EnhancedTemplate[];
     
     // Find exact match first
     let template = templates.find(t => t.buildType === request.buildType);
@@ -94,7 +96,7 @@ export class PlanningAgent {
     if (request.materials.includes('stone') || request.materials.includes('concrete')) difficultyScore += 1;
 
     // Experience adjustment
-    if (request.experience === 'advanced') difficultyScore = Math.max(1, difficultyScore - 1);
+    if (request.experience === 'expert') difficultyScore = Math.max(1, difficultyScore - 1);
     if (request.experience === 'beginner') difficultyScore += 1;
 
     if (difficultyScore <= 2) return 'beginner';
@@ -109,6 +111,7 @@ export class PlanningAgent {
     return basePhases.map((phase, index) => ({
       ...phase,
       id: `phase-${index + 1}`,
+      order: index + 1,
       estimatedHours: this.calculatePhaseHours(phase, request),
       weatherDependent: this.isWeatherDependent(phase),
       skillLevel: this.determinePhaseSkillLevel(phase, request),
@@ -131,7 +134,7 @@ export class PlanningAgent {
         category: 'Tools',
         title: 'Tool Safety',
         description: 'Inspect all tools before use and follow manufacturer guidelines',
-        severity: 'High',
+        severity: 'Warning',
         applicablePhases: ['preparation', 'construction']
       },
       {
@@ -139,7 +142,7 @@ export class PlanningAgent {
         category: 'Materials',
         title: 'Material Handling',
         description: 'Use proper lifting techniques for heavy materials',
-        severity: 'High',
+        severity: 'Warning',
         applicablePhases: ['preparation', 'construction']
       }
     ];
@@ -173,7 +176,7 @@ export class PlanningAgent {
     
     // Adjust for experience
     if (request.experience === 'beginner') baseHours *= 1.5;
-    if (request.experience === 'advanced') baseHours *= 0.8;
+    if (request.experience === 'expert') baseHours *= 0.8;
     
     // Convert to days
     const days = Math.ceil(baseHours / 8);
@@ -302,4 +305,50 @@ export class PlanningAgent {
     }
     return 'medium';
   }
+
+  private extractToolsFromPhases(phases: BuildPhase[]): string[] {
+    const tools = new Set<string>();
+    phases.forEach(phase => {
+      phase.tools?.forEach(tool => tools.add(tool));
+    });
+    return Array.from(tools);
+  }
+
+  private determineRequiredPermits(request: ParsedRequest): string[] {
+    const permits: string[] = [];
+    
+    if ((request.dimensions.height || 0) > 2) {
+      permits.push('Building permit may be required for structures over 2m height');
+    }
+    
+    if (request.buildType.includes('foundation')) {
+      permits.push('Foundation work may require inspection');
+    }
+    
+    return permits;
+  }
+
+  private generateWeatherConsiderations(request: ParsedRequest): string[] {
+    return [
+      'Avoid concrete work in freezing temperatures',
+      'Cover work area during rain',
+      'Allow extra drying time in humid conditions',
+      'Plan for seasonal material expansion'
+    ];
+  }
+
+  private generateMaintenanceSchedule(request: ParsedRequest): string[] {
+    const schedule = [
+      'Monthly: Visual inspection for cracks or damage',
+      'Annually: Deep clean and re-seal if necessary'
+    ];
+    
+    if (request.buildType.includes('oven') || request.buildType.includes('fire')) {
+      schedule.push('After each use: Clean ash and debris');
+      schedule.push('Seasonally: Inspect chimney and ventilation');
+    }
+    
+    return schedule;
+  }
 }
+

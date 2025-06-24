@@ -73,7 +73,7 @@ export class WorkflowEngine {
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       content: message,
-      sender: 'user',
+      type: 'user',
       timestamp: new Date()
     };
     this.state.conversationHistory.push(userMessage);
@@ -126,7 +126,7 @@ export class WorkflowEngine {
       const assistantMessage: ChatMessage = {
         id: `msg-${Date.now()}-assistant`,
         content: response,
-        sender: 'assistant',
+        type: 'agent',
         timestamp: new Date()
       };
       this.state.conversationHistory.push(assistantMessage);
@@ -159,7 +159,7 @@ export class WorkflowEngine {
     console.log('🎯 Handling input phase');
     
     try {
-      this.state.parsedRequest = await this.inputAgent.parseRequest(message);
+      this.state.parsedRequest = await this.inputAgent.parseUserInput(message);
       console.log('✅ Request parsed successfully:', this.state.parsedRequest);
       
       const response = `Great! I understand you want to build a ${this.state.parsedRequest.buildType.replace('_', ' ')}. Let me create a detailed plan for you.`;
@@ -213,7 +213,7 @@ The plan includes ${this.state.blueprint.phases.length} detailed phases with saf
     }
 
     try {
-      this.state.materials = await this.catalogAgent.calculateMaterials(this.state.parsedRequest);
+      this.state.materials = await this.catalogAgent.calculateMaterialNeeds(this.state.parsedRequest);
       console.log('✅ Materials calculated successfully');
 
       const topMaterials = this.state.materials.materials.slice(0, 5);
@@ -391,7 +391,7 @@ Your complete build plan is now ready with AI-powered insights! How would you li
     if (!this.state.blueprint) return "No build plan available yet.";
     
     const phases = this.state.blueprint.phases.map((phase, index) => 
-      `**Phase ${index + 1}: ${phase.title}**\n${phase.description}\n- Time: ${phase.estimatedHours || 'TBD'} hours\n- Tools: ${phase.tools?.join(', ') || 'Standard tools'}`
+      `**Phase ${index + 1}: ${phase.title || phase.name}**\n${phase.description}\n- Time: ${phase.estimatedHours || 'TBD'} hours\n- Tools: ${phase.tools?.join(', ') || 'Standard tools'}`
     ).join('\n\n');
     
     return `Here are your build phases:\n\n${phases}`;
