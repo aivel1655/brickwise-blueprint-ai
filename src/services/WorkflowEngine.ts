@@ -381,10 +381,10 @@ Your complete build plan is now ready with AI-powered insights! How would you li
 
     const context = {
       buildType: this.state.parsedRequest.buildType,
-      budget: this.state.parsedRequest.budget?.value,
+      budget: this.state.parsedRequest.budget,
       prioritizeQuality: message.toLowerCase().includes('quality') || message.toLowerCase().includes('premium'),
       prioritizeCost: message.toLowerCase().includes('cheap') || message.toLowerCase().includes('save') || message.toLowerCase().includes('budget'),
-      userExperience: this.state.parsedRequest.experience?.value || 'intermediate'
+      userExperience: this.state.parsedRequest.experience || 'intermediate'
     };
 
     const recommendations = this.recommendationEngine.getRecommendations(
@@ -421,7 +421,7 @@ Your complete build plan is now ready with AI-powered insights! How would you li
     // Add cost optimization summary
     const costOptimization = this.recommendationEngine.getCostOptimizations(
       this.state.materials.materials,
-      this.state.parsedRequest.budget?.value || 1000
+      this.state.parsedRequest.budget || 1000
     );
 
     if (costOptimization.totalSavings > 0) {
