@@ -40,6 +40,23 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
     }
   };
 
+  // Helper function to safely get materials array
+  const getMaterialsArray = () => {
+    if (!message.data?.materials) return [];
+    
+    // If materials is already an array (legacy format)
+    if (Array.isArray(message.data.materials)) {
+      return message.data.materials;
+    }
+    
+    // If materials is a MaterialCalculation object with materials property
+    if (message.data.materials.materials && Array.isArray(message.data.materials.materials)) {
+      return message.data.materials.materials;
+    }
+    
+    return [];
+  };
+
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-md ${isUser ? 'order-1' : 'order-2'}`}>
@@ -66,12 +83,22 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
               {message.data.materials && (
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Materials Required:</h4>
-                  {message.data.materials.map((material: any, index: number) => (
+                  {getMaterialsArray().slice(0, 5).map((material: any, index: number) => (
                     <div key={index} className="text-sm bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
-                      <span className="font-medium">{material.name}</span>: {material.quantity} {material.unit}
-                      {material.totalPrice && <span className="float-right">€{material.totalPrice.toFixed(2)}</span>}
+                      <span className="font-medium">{material.material?.name || material.name}</span>: {material.quantity} {material.material?.unit || material.unit}
+                      {(material.totalCost || material.totalPrice) && (
+                        <span className="float-right">€{(material.totalCost || material.totalPrice).toFixed(2)}</span>
+                      )}
                     </div>
                   ))}
+                  {getMaterialsArray().length > 5 && (
+                    <p className="text-xs text-gray-500">...and {getMaterialsArray().length - 5} more materials</p>
+                  )}
+                  {message.data.materials.totalCost && (
+                    <div className="text-sm font-medium pt-2 border-t border-orange-200 dark:border-orange-600">
+                      Total Cost: €{message.data.materials.totalCost.toFixed(2)}
+                    </div>
+                  )}
                 </div>
               )}
               
