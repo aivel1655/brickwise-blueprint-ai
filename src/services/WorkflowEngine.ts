@@ -160,7 +160,7 @@ export class WorkflowEngine {
     console.log('🎯 Handling input phase');
     
     try {
-      this.state.parsedRequest = this.inputAgent.parseUserInput(message);
+      this.state.parsedRequest = this.inputAgent.parsePrompt(message);
       console.log('✅ Request parsed successfully:', this.state.parsedRequest);
       
       const response = `Great! I understand you want to build a ${this.state.parsedRequest.buildType.replace('_', ' ')}. Let me create a detailed plan for you.`;

@@ -1,60 +1,46 @@
+
 // Test utility for Planning Agent Templates
 import { MockCatalogAgent } from '../services/MockCatalogAgent';
 import { PlanningAgent } from '../services/PlanningAgent';
 
 export function testPlanningAgent() {
-  console.log('🧪 Testing Planning Agent Templates...');
+  console.log('🧪 Testing Planning Agent...');
   
   const catalogAgent = new MockCatalogAgent();
-  const planningAgent = new PlanningAgent(catalogAgent);
+  const planningAgent = new PlanningAgent();
   
-  // Test 1: Get available templates
-  const templates = planningAgent.getAvailableTemplates();
-  console.log('📋 Available Templates:', templates.map(t => `${t.name} (${t.difficulty})`));
-  
-  // Test 2: Difficulty assessment
-  const assessments = [
-    { buildType: 'wall', experience: 'beginner' },
-    { buildType: 'pizza_oven', experience: 'beginner' },
-    { buildType: 'pizza_oven', experience: 'expert' },
-    { buildType: 'garden_wall', experience: 'beginner' }
-  ];
-  
-  assessments.forEach(test => {
-    const assessment = planningAgent.getDifficultyAssessment(test.buildType, test.experience);
-    console.log(`🎯 ${test.buildType} for ${test.experience}:`, {
-      suitable: assessment.suitable,
-      timeEstimate: assessment.timeEstimate
-    });
-  });
-  
-  // Test 3: Create structured plan
+  // Test 1: Create enhanced blueprint for garden wall
   try {
     const testRequest = {
       buildType: 'garden_wall' as const,
-      dimensions: { length: 2, height: 1 },
+      dimensions: { length: 2, width: 0.2, height: 1 },
       materials: ['brick'],
       constraints: [],
       confidence: 0.8,
-      experience: 'beginner' as const
+      experience: 'beginner' as const,
+      urgency: 'low' as const,
+      budget: undefined
     };
     
-    const materials = catalogAgent.calculateMaterialNeeds(testRequest.buildType, testRequest.dimensions);
-    const plan = planningAgent.createStructuredPlan(testRequest, materials);
-    
-    console.log('📊 Garden Wall Plan Created:', {
-      templateId: plan.templateId,
-      phases: plan.phases.length,
-      steps: plan.detailedSteps.length,
-      safetyGuidelines: plan.safetyGuidelines.length,
-      totalCost: plan.totalCost,
-      difficulty: plan.difficulty
+    planningAgent.createEnhancedBlueprint(testRequest).then(blueprint => {
+      console.log('📊 Garden Wall Blueprint Created:', {
+        id: blueprint.id,
+        buildType: blueprint.buildType,
+        phases: blueprint.phases.length,
+        difficulty: blueprint.difficulty,
+        totalCost: blueprint.totalCost,
+        estimatedTime: blueprint.estimatedTime,
+        materials: blueprint.materials.length,
+        safetyGuidelines: blueprint.safetyGuidelines.length
+      });
+    }).catch(error => {
+      console.error('❌ Garden Wall Blueprint Error:', error);
     });
   } catch (error) {
-    console.error('❌ Plan Creation Error:', error);
+    console.error('❌ Test Setup Error:', error);
   }
   
-  // Test 4: Pizza oven advanced plan
+  // Test 2: Create enhanced blueprint for pizza oven
   try {
     const ovenRequest = {
       buildType: 'pizza_oven' as const,
@@ -62,22 +48,27 @@ export function testPlanningAgent() {
       materials: ['firebrick'],
       constraints: [],
       confidence: 0.9,
-      experience: 'intermediate' as const
+      experience: 'intermediate' as const,
+      urgency: 'low' as const,
+      budget: undefined
     };
     
-    const ovenMaterials = catalogAgent.calculateMaterialNeeds(ovenRequest.buildType, ovenRequest.dimensions);
-    const ovenPlan = planningAgent.createStructuredPlan(ovenRequest, ovenMaterials);
-    
-    console.log('🍕 Pizza Oven Plan Created:', {
-      templateId: ovenPlan.templateId,
-      phases: ovenPlan.phases.length,
-      steps: ovenPlan.detailedSteps.length,
-      troubleshooting: ovenPlan.troubleshooting.length,
-      totalCost: ovenPlan.totalCost,
-      estimatedTime: ovenPlan.estimatedTime
+    planningAgent.createEnhancedBlueprint(ovenRequest).then(blueprint => {
+      console.log('🍕 Pizza Oven Blueprint Created:', {
+        id: blueprint.id,
+        buildType: blueprint.buildType,
+        phases: blueprint.phases.length,
+        difficulty: blueprint.difficulty,
+        totalCost: blueprint.totalCost,
+        estimatedTime: blueprint.estimatedTime,
+        tools: blueprint.tools.length,
+        permits: blueprint.permits.length
+      });
+    }).catch(error => {
+      console.error('❌ Pizza Oven Blueprint Error:', error);
     });
   } catch (error) {
-    console.error('❌ Oven Plan Creation Error:', error);
+    console.error('❌ Oven Test Setup Error:', error);
   }
   
   console.log('✅ Planning Agent Tests Complete!');
