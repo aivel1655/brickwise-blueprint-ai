@@ -1,13 +1,5 @@
 
-import { 
-  ParsedRequest, 
-  EnhancedBlueprint,
-  SafetyGuideline,
-  BuildPhase,
-  QualityCheck,
-  EnhancedTemplate 
-} from '../types';
-import buildTemplates from '../data/build-templates.json';
+import { ParsedRequest, EnhancedBlueprint, Material, BuildPhase, SafetyGuideline, QualityCheck } from '../types';
 import { MockCatalogAgent } from './MockCatalogAgent';
 
 export class PlanningAgent {
@@ -17,338 +9,337 @@ export class PlanningAgent {
     this.catalogAgent = new MockCatalogAgent();
   }
 
-  async createEnhancedBlueprint(request: ParsedRequest): Promise<EnhancedBlueprint> {
-    console.log('🏗️ Creating enhanced blueprint for:', request);
+  async createEnhancedBlueprint(parsedRequest: ParsedRequest): Promise<EnhancedBlueprint> {
+    console.log('🏗️ Creating enhanced blueprint for:', parsedRequest.buildType);
 
-    // Get base template
-    const template = this.findBestTemplate(request);
-    const materials = await this.catalogAgent.calculateMaterialNeeds(request);
-    
-    // Calculate enhanced properties
-    const difficulty = this.calculateDifficulty(request, template);
-    const phases = this.createDetailedPhases(request, template);
-    const safetyGuidelines = this.generateSafetyGuidelines(request, template);
-    const qualityChecks = this.generateQualityChecks(request, template);
-    
-    const blueprint: EnhancedBlueprint = {
-      id: `blueprint-${Date.now()}`,
-      templateId: template.id,
-      buildType: request.buildType,
-      dimensions: request.dimensions,
-      experienceLevel: request.experience || 'beginner',
-      difficulty,
-      estimatedTime: this.calculateEstimatedTime(request, template, difficulty),
-      totalCost: materials.totalCost,
-      phases,
-      safetyGuidelines,
-      qualityChecks,
-      materials: materials.materials,
-      tools: this.extractToolsFromPhases(phases),
-      permits: this.determineRequiredPermits(request),
-      weatherConsiderations: this.generateWeatherConsiderations(request),
-      maintenanceSchedule: this.generateMaintenanceSchedule(request)
-    };
+    try {
+      // Calculate materials using the catalog agent
+      const materialCalculation = this.catalogAgent.calculateMaterialNeeds(parsedRequest.buildType, {
+        length: parsedRequest.dimensions.length || 1,
+        width: parsedRequest.dimensions.width || 1,
+        height: parsedRequest.dimensions.height || 1,
+        diameter: parsedRequest.dimensions.diameter
+      });
 
-    console.log('✅ Enhanced blueprint created:', blueprint);
-    return blueprint;
-  }
+      // Convert MaterialCalculationItem[] to Material[]
+      const materials: Material[] = materialCalculation.materials.map(item => ({
+        id: item.material.id,
+        name: item.material.name,
+        quantity: item.quantity,
+        unit: item.material.unit,
+        pricePerUnit: item.material.price,
+        totalPrice: item.totalCost,
+        sapSku: item.material.id,
+        alternatives: [],
+        inStock: item.material.inStock
+      }));
 
-  private findBestTemplate(request: ParsedRequest): EnhancedTemplate {
-    const templatesData = buildTemplates as { templates: any[] };
-    const templates = templatesData.templates as EnhancedTemplate[];
-    
-    // Find exact match first
-    let template = templates.find(t => t.buildType === request.buildType);
-    
-    // Fallback to similar template
-    if (!template) {
-      template = templates.find(t => 
-        t.buildType.includes(request.buildType.split('_')[0]) ||
-        request.buildType.includes(t.buildType.split('_')[0])
-      );
+      // Create phases based on build type
+      const phases = this.createPhases(parsedRequest.buildType, parsedRequest.dimensions);
+      
+      // Create safety guidelines
+      const safetyGuidelines = this.createSafetyGuidelines(parsedRequest.buildType);
+      
+      // Create quality checks
+      const qualityChecks = this.createQualityChecks(parsedRequest.buildType);
+
+      const blueprint: EnhancedBlueprint = {
+        id: `blueprint-${Date.now()}`,
+        templateId: `template-${parsedRequest.buildType}`,
+        buildType: parsedRequest.buildType,
+        dimensions: parsedRequest.dimensions,
+        experienceLevel: parsedRequest.experience || 'intermediate',
+        difficulty: this.getDifficultyLevel(parsedRequest.buildType),
+        phases,
+        totalCost: materialCalculation.totalCost,
+        estimatedTime: this.getEstimatedTime(parsedRequest.buildType),
+        materials,
+        safetyGuidelines,
+        qualityChecks,
+        detailedSteps: [],
+        troubleshooting: [],
+        tools: this.getRequiredTools(parsedRequest.buildType),
+        permits: this.getRequiredPermits(parsedRequest.buildType),
+        weatherConsiderations: this.getWeatherConsiderations(parsedRequest.buildType),
+        maintenanceSchedule: this.getMaintenanceSchedule(parsedRequest.buildType)
+      };
+
+      console.log('✅ Blueprint created successfully');
+      return blueprint;
+
+    } catch (error) {
+      console.error('❌ Error creating blueprint:', error);
+      throw new Error(`Failed to create blueprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-    
-    // Ultimate fallback
-    if (!template) {
-      template = templates[0];
-    }
-
-    return template;
   }
 
-  private calculateDifficulty(request: ParsedRequest, template: EnhancedTemplate): 'beginner' | 'intermediate' | 'advanced' {
-    let difficultyScore = 0;
-
-    // Base difficulty from template
-    if (template.difficulty === 'beginner') difficultyScore += 1;
-    else if (template.difficulty === 'intermediate') difficultyScore += 2;
-    else difficultyScore += 3;
-
-    // Size complexity
-    const area = (request.dimensions.width || 1) * (request.dimensions.length || 1);
-    if (area > 10) difficultyScore += 1;
-    if (area > 25) difficultyScore += 1;
-
-    // Height complexity
-    if ((request.dimensions.height || 0) > 2) difficultyScore += 1;
-
-    // Material complexity
-    if (request.materials.includes('stone') || request.materials.includes('concrete')) difficultyScore += 1;
-
-    // Experience adjustment
-    if (request.experience === 'expert') difficultyScore = Math.max(1, difficultyScore - 1);
-    if (request.experience === 'beginner') difficultyScore += 1;
-
-    if (difficultyScore <= 2) return 'beginner';
-    if (difficultyScore <= 4) return 'intermediate';
-    return 'advanced';
-  }
-
-  private createDetailedPhases(request: ParsedRequest, template: EnhancedTemplate): BuildPhase[] {
-    // Enhanced phases with more detail
-    const basePhases = template.phases || [];
+  private createPhases(buildType: string, dimensions: any): BuildPhase[] {
+    const basePhases = this.getBasePhases(buildType);
     
     return basePhases.map((phase, index) => ({
-      ...phase,
       id: `phase-${index + 1}`,
+      name: phase.name,
+      title: phase.title || phase.name,
+      description: phase.description,
+      duration: phase.duration || '1-2 hours',
       order: index + 1,
-      estimatedHours: this.calculatePhaseHours(phase, request),
-      weatherDependent: this.isWeatherDependent(phase),
-      skillLevel: this.determinePhaseSkillLevel(phase, request),
-      safetyPriority: this.calculateSafetyPriority(phase)
+      materials: [],
+      tools: phase.tools || [],
+      estimatedHours: phase.estimatedHours || 4,
+      weatherDependent: phase.weatherDependent || false,
+      skillLevel: phase.skillLevel || 'intermediate',
+      safetyPriority: phase.safetyPriority || 'medium'
     }));
   }
 
-  private generateSafetyGuidelines(request: ParsedRequest, template: EnhancedTemplate): SafetyGuideline[] {
-    const guidelines: SafetyGuideline[] = [
+  private getBasePhases(buildType: string) {
+    switch (buildType) {
+      case 'pizza_oven':
+        return [
+          {
+            name: 'Foundation Preparation',
+            description: 'Prepare the foundation base and ensure level surface',
+            duration: '2-3 hours',
+            estimatedHours: 3,
+            tools: ['shovel', 'level', 'measuring_tape'],
+            weatherDependent: true,
+            skillLevel: 'intermediate' as const,
+            safetyPriority: 'medium' as const
+          },
+          {
+            name: 'Base Construction',
+            description: 'Build the insulated base platform',
+            duration: '3-4 hours',
+            estimatedHours: 4,
+            tools: ['trowel', 'mixer', 'level'],
+            skillLevel: 'intermediate' as const,
+            safetyPriority: 'high' as const
+          },
+          {
+            name: 'Dome Construction',
+            description: 'Build the oven dome using fire bricks',
+            duration: '6-8 hours',
+            estimatedHours: 7,
+            tools: ['trowel', 'hammer', 'chisel'],
+            skillLevel: 'advanced' as const,
+            safetyPriority: 'high' as const
+          },
+          {
+            name: 'Insulation & Finishing',
+            description: 'Apply insulation layer and finishing touches',
+            duration: '2-3 hours',
+            estimatedHours: 3,
+            tools: ['trowel', 'brush'],
+            skillLevel: 'intermediate' as const,
+            safetyPriority: 'medium' as const
+          }
+        ];
+      case 'garden_wall':
+        return [
+          {
+            name: 'Foundation Digging',
+            description: 'Dig foundation trench to required depth',
+            duration: '2-4 hours',
+            estimatedHours: 3,
+            tools: ['shovel', 'pickaxe', 'measuring_tape'],
+            weatherDependent: true,
+            skillLevel: 'beginner' as const,
+            safetyPriority: 'medium' as const
+          },
+          {
+            name: 'Foundation Laying',
+            description: 'Pour and level concrete foundation',
+            duration: '2-3 hours',
+            estimatedHours: 3,
+            tools: ['mixer', 'trowel', 'level'],
+            skillLevel: 'intermediate' as const,
+            safetyPriority: 'high' as const
+          },
+          {
+            name: 'Wall Construction',
+            description: 'Lay bricks with proper mortar joints',
+            duration: '4-8 hours',
+            estimatedHours: 6,
+            tools: ['trowel', 'level', 'string_line'],
+            skillLevel: 'intermediate' as const,
+            safetyPriority: 'medium' as const
+          },
+          {
+            name: 'Pointing & Finishing',
+            description: 'Complete mortar joints and clean the wall',
+            duration: '1-2 hours',
+            estimatedHours: 2,
+            tools: ['pointing_trowel', 'brush', 'sponge'],
+            skillLevel: 'beginner' as const,
+            safetyPriority: 'low' as const
+          }
+        ];
+      default:
+        return [
+          {
+            name: 'Preparation',
+            description: 'Prepare materials and work area',
+            duration: '1-2 hours',
+            estimatedHours: 2,
+            tools: ['measuring_tape', 'level'],
+            skillLevel: 'beginner' as const,
+            safetyPriority: 'medium' as const
+          },
+          {
+            name: 'Construction',
+            description: 'Main construction phase',
+            duration: '4-6 hours',
+            estimatedHours: 5,
+            tools: ['trowel', 'hammer'],
+            skillLevel: 'intermediate' as const,
+            safetyPriority: 'high' as const
+          },
+          {
+            name: 'Finishing',
+            description: 'Final touches and cleanup',
+            duration: '1-2 hours',
+            estimatedHours: 2,
+            tools: ['brush', 'sponge'],
+            skillLevel: 'beginner' as const,
+            safetyPriority: 'low' as const
+          }
+        ];
+    }
+  }
+
+  private createSafetyGuidelines(buildType: string): SafetyGuideline[] {
+    const commonSafety: SafetyGuideline[] = [
       {
-        id: 'ppe-1',
+        id: 'ppe-001',
         category: 'PPE',
         title: 'Personal Protective Equipment',
-        description: 'Always wear safety glasses, work gloves, and steel-toed boots',
+        description: 'Always wear safety glasses, work gloves, and closed-toe shoes',
         severity: 'Critical',
-        applicablePhases: ['foundation', 'construction', 'finishing']
+        applicablePhases: ['all']
       },
       {
-        id: 'tools-1',
+        id: 'tools-001',
         category: 'Tools',
         title: 'Tool Safety',
-        description: 'Inspect all tools before use and follow manufacturer guidelines',
+        description: 'Inspect all tools before use and keep them clean and sharp',
         severity: 'Warning',
-        applicablePhases: ['preparation', 'construction']
-      },
-      {
-        id: 'materials-1',
-        category: 'Materials',
-        title: 'Material Handling',
-        description: 'Use proper lifting techniques for heavy materials',
-        severity: 'Warning',
-        applicablePhases: ['preparation', 'construction']
+        applicablePhases: ['all']
       }
     ];
 
-    // Add specific guidelines based on build type
-    if (request.buildType.includes('oven') || request.buildType.includes('fire')) {
-      guidelines.push({
-        id: 'fire-1',
-        category: 'Emergency',
-        title: 'Fire Safety',
-        description: 'Keep fire extinguisher nearby and ensure proper ventilation',
-        severity: 'Critical',
-        applicablePhases: ['construction', 'testing']
+    const specificSafety: SafetyGuideline[] = [];
+    
+    if (buildType === 'pizza_oven') {
+      specificSafety.push({
+        id: 'fire-001',
+        category: 'Materials',
+        title: 'Fire Brick Handling',
+        description: 'Fire bricks are heavy and can be sharp. Handle with care and use proper lifting techniques',
+        severity: 'Warning',
+        applicablePhases: ['phase-3']
       });
     }
 
-    return guidelines;
+    return [...commonSafety, ...specificSafety];
   }
 
-  private calculateEstimatedTime(request: ParsedRequest, template: EnhancedTemplate, difficulty: string): string {
-    let baseHours = template.estimatedHours || 8;
-    
-    // Adjust for difficulty
-    if (difficulty === 'advanced') baseHours *= 1.5;
-    if (difficulty === 'intermediate') baseHours *= 1.2;
-    
-    // Adjust for size
-    const area = (request.dimensions.width || 1) * (request.dimensions.length || 1);
-    if (area > 10) baseHours *= 1.3;
-    if (area > 25) baseHours *= 1.6;
-    
-    // Adjust for experience
-    if (request.experience === 'beginner') baseHours *= 1.5;
-    if (request.experience === 'expert') baseHours *= 0.8;
-    
-    // Convert to days
-    const days = Math.ceil(baseHours / 8);
-    if (days === 1) return '1 day';
-    if (days <= 7) return `${days} days`;
-    const weeks = Math.ceil(days / 7);
-    return `${weeks} week${weeks > 1 ? 's' : ''}`;
-  }
-
-  private generateQualityChecks(request: ParsedRequest, template: EnhancedTemplate): QualityCheck[] {
+  private createQualityChecks(buildType: string): QualityCheck[] {
     return [
       {
         id: 'level-check',
         phase: 'foundation',
-        description: 'Verify all foundation elements are level using a spirit level',
+        description: 'Verify foundation is level using spirit level',
         criticalPath: true,
-        toolsRequired: ['spirit level', 'measuring tape']
+        toolsRequired: ['spirit_level']
       },
       {
         id: 'alignment-check',
         phase: 'construction',
-        description: 'Check structural alignment at each course',
+        description: 'Check vertical alignment every 3-4 courses',
         criticalPath: true,
-        toolsRequired: ['string line', 'spirit level']
-      },
-      {
-        id: 'final-inspection',
-        phase: 'finishing',
-        description: 'Complete final inspection of all joints and surfaces',
-        criticalPath: false,
-        toolsRequired: ['flashlight', 'measuring tape']
+        toolsRequired: ['plumb_line', 'level']
       }
     ];
   }
 
-  private extractToolsFromPhases(phases: BuildPhase[]): string[] {
-    const tools = new Set<string>();
-    phases.forEach(phase => {
-      phase.tools?.forEach(tool => tools.add(tool));
-    });
-    return Array.from(tools);
+  private getDifficultyLevel(buildType: string): 'beginner' | 'intermediate' | 'advanced' {
+    switch (buildType) {
+      case 'garden_wall':
+        return 'intermediate';
+      case 'pizza_oven':
+        return 'advanced';
+      case 'fire_pit':
+        return 'intermediate';
+      default:
+        return 'intermediate';
+    }
   }
 
-  private determineRequiredPermits(request: ParsedRequest): string[] {
-    const permits: string[] = [];
-    
-    if ((request.dimensions.height || 0) > 2) {
-      permits.push('Building permit may be required for structures over 2m height');
+  private getEstimatedTime(buildType: string): string {
+    switch (buildType) {
+      case 'garden_wall':
+        return '2-3 days';
+      case 'pizza_oven':
+        return '3-5 days';
+      case 'fire_pit':
+        return '1-2 days';
+      default:
+        return '2-4 days';
     }
-    
-    if (request.buildType.includes('foundation')) {
-      permits.push('Foundation work may require inspection');
-    }
-    
-    return permits;
   }
 
-  private generateWeatherConsiderations(request: ParsedRequest): string[] {
+  private getRequiredTools(buildType: string): string[] {
+    const commonTools = ['trowel', 'level', 'measuring_tape', 'hammer'];
+    
+    switch (buildType) {
+      case 'pizza_oven':
+        return [...commonTools, 'chisel', 'angle_grinder', 'mixer'];
+      case 'garden_wall':
+        return [...commonTools, 'string_line', 'shovel', 'wheelbarrow'];
+      default:
+        return commonTools;
+    }
+  }
+
+  private getRequiredPermits(buildType: string): string[] {
+    switch (buildType) {
+      case 'pizza_oven':
+        return ['Building permit may be required for permanent structures'];
+      case 'garden_wall':
+        return ['Check local regulations for wall height restrictions'];
+      default:
+        return ['Check local building codes and regulations'];
+    }
+  }
+
+  private getWeatherConsiderations(buildType: string): string[] {
     return [
-      'Avoid concrete work in freezing temperatures',
-      'Cover work area during rain',
-      'Allow extra drying time in humid conditions',
-      'Plan for seasonal material expansion'
+      'Avoid construction during rain or extreme temperatures',
+      'Allow proper curing time in dry conditions',
+      'Protect work from frost during winter months'
     ];
   }
 
-  private generateMaintenanceSchedule(request: ParsedRequest): string[] {
-    const schedule = [
-      'Monthly: Visual inspection for cracks or damage',
-      'Annually: Deep clean and re-seal if necessary'
-    ];
-    
-    if (request.buildType.includes('oven') || request.buildType.includes('fire')) {
-      schedule.push('After each use: Clean ash and debris');
-      schedule.push('Seasonally: Inspect chimney and ventilation');
+  private getMaintenanceSchedule(buildType: string): string[] {
+    switch (buildType) {
+      case 'pizza_oven':
+        return [
+          'Clean ash and debris after each use',
+          'Inspect for cracks annually',
+          'Reapply protective coating every 2-3 years'
+        ];
+      case 'garden_wall':
+        return [
+          'Inspect mortar joints annually',
+          'Clear vegetation growth',
+          'Repoint damaged joints as needed'
+        ];
+      default:
+        return [
+          'Regular visual inspections',
+          'Clean as needed',
+          'Repair damage promptly'
+        ];
     }
-    
-    return schedule;
-  }
-
-  private calculatePhaseHours(phase: any, request: ParsedRequest): number {
-    // Base hours from template or estimate
-    let hours = phase.estimatedHours || 4;
-    
-    // Adjust for project size
-    const area = (request.dimensions.width || 1) * (request.dimensions.length || 1);
-    if (area > 10) hours *= 1.2;
-    
-    return Math.ceil(hours);
-  }
-
-  private isWeatherDependent(phase: any): boolean {
-    const weatherSensitive = ['foundation', 'concrete', 'mortar', 'exterior'];
-    return weatherSensitive.some(keyword => 
-      phase.title?.toLowerCase().includes(keyword) || 
-      phase.description?.toLowerCase().includes(keyword)
-    );
-  }
-
-  private determinePhaseSkillLevel(phase: any, request: ParsedRequest): 'beginner' | 'intermediate' | 'advanced' {
-    const advancedKeywords = ['precision', 'critical', 'complex', 'advanced'];
-    const intermediateKeywords = ['alignment', 'level', 'measurement'];
-    
-    const description = (phase.title + ' ' + phase.description).toLowerCase();
-    
-    if (advancedKeywords.some(keyword => description.includes(keyword))) {
-      return 'advanced';
-    }
-    if (intermediateKeywords.some(keyword => description.includes(keyword))) {
-      return 'intermediate';
-    }
-    return 'beginner';
-  }
-
-  private calculateSafetyPriority(phase: any): 'low' | 'medium' | 'high' | 'critical' {
-    const criticalKeywords = ['electrical', 'fire', 'height', 'heavy'];
-    const highKeywords = ['tools', 'cutting', 'lifting'];
-    
-    const description = (phase.title + ' ' + phase.description).toLowerCase();
-    
-    if (criticalKeywords.some(keyword => description.includes(keyword))) {
-      return 'critical';
-    }
-    if (highKeywords.some(keyword => description.includes(keyword))) {
-      return 'high';
-    }
-    return 'medium';
-  }
-
-  private extractToolsFromPhases(phases: BuildPhase[]): string[] {
-    const tools = new Set<string>();
-    phases.forEach(phase => {
-      phase.tools?.forEach(tool => tools.add(tool));
-    });
-    return Array.from(tools);
-  }
-
-  private determineRequiredPermits(request: ParsedRequest): string[] {
-    const permits: string[] = [];
-    
-    if ((request.dimensions.height || 0) > 2) {
-      permits.push('Building permit may be required for structures over 2m height');
-    }
-    
-    if (request.buildType.includes('foundation')) {
-      permits.push('Foundation work may require inspection');
-    }
-    
-    return permits;
-  }
-
-  private generateWeatherConsiderations(request: ParsedRequest): string[] {
-    return [
-      'Avoid concrete work in freezing temperatures',
-      'Cover work area during rain',
-      'Allow extra drying time in humid conditions',
-      'Plan for seasonal material expansion'
-    ];
-  }
-
-  private generateMaintenanceSchedule(request: ParsedRequest): string[] {
-    const schedule = [
-      'Monthly: Visual inspection for cracks or damage',
-      'Annually: Deep clean and re-seal if necessary'
-    ];
-    
-    if (request.buildType.includes('oven') || request.buildType.includes('fire')) {
-      schedule.push('After each use: Clean ash and debris');
-      schedule.push('Seasonally: Inspect chimney and ventilation');
-    }
-    
-    return schedule;
   }
 }
-

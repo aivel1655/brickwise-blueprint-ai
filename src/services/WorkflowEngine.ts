@@ -1,3 +1,4 @@
+
 import { 
   ParsedRequest, 
   ChatMessage, 
@@ -159,7 +160,7 @@ export class WorkflowEngine {
     console.log('🎯 Handling input phase');
     
     try {
-      this.state.parsedRequest = await this.inputAgent.parseUserInput(message);
+      this.state.parsedRequest = this.inputAgent.parseUserInput(message);
       console.log('✅ Request parsed successfully:', this.state.parsedRequest);
       
       const response = `Great! I understand you want to build a ${this.state.parsedRequest.buildType.replace('_', ' ')}. Let me create a detailed plan for you.`;
@@ -213,7 +214,12 @@ The plan includes ${this.state.blueprint.phases.length} detailed phases with saf
     }
 
     try {
-      this.state.materials = await this.catalogAgent.calculateMaterialNeeds(this.state.parsedRequest);
+      this.state.materials = this.catalogAgent.calculateMaterialNeeds(this.state.parsedRequest.buildType, {
+        length: this.state.parsedRequest.dimensions.length || 1,
+        width: this.state.parsedRequest.dimensions.width || 1,
+        height: this.state.parsedRequest.dimensions.height || 1,
+        diameter: this.state.parsedRequest.dimensions.diameter
+      });
       console.log('✅ Materials calculated successfully');
 
       const topMaterials = this.state.materials.materials.slice(0, 5);

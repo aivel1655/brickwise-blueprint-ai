@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,8 @@ import {
   AlertCircle, 
   ExternalLink,
   Eye,
-  EyeOff
+  EyeOff,
+  Cloud
 } from 'lucide-react';
 import { agentService } from '../services/agentService';
 
@@ -26,11 +28,30 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
   const [showKey, setShowKey] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<{ valid: boolean; message: string } | null>(null);
+  const [usingSupabaseKey, setUsingSupabaseKey] = useState(false);
 
   useEffect(() => {
+    checkApiKeyStatus();
+  }, [onApiKeyUpdate]);
+
+  const checkApiKeyStatus = async () => {
     // Check if API key is already set
     const sessionInfo = agentService.getSessionInfo();
     setIsKeySet(sessionInfo.hasApiKey);
+    
+    // Check if we're using Supabase key
+    try {
+      const response = await fetch('/lovable-uploads/api/get-groq-key');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.apiKey && sessionInfo.hasApiKey) {
+          setUsingSupabaseKey(true);
+        }
+      }
+    } catch (error) {
+      // Supabase key not available
+      setUsingSupabaseKey(false);
+    }
     
     // Load saved key from localStorage
     try {
@@ -44,7 +65,7 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
     }
 
     onApiKeyUpdate?.(sessionInfo.hasApiKey);
-  }, [onApiKeyUpdate]);
+  };
 
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
@@ -61,7 +82,8 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
     setValidationResult(null);
 
     try {
-      // Save the API key
+      // Save the API key locally and to the service
+      localStorage.setItem('groq_api_key', apiKey);
       agentService.setGroqApiKey(apiKey);
       
       // Verify the session info is updated
@@ -69,6 +91,7 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
       
       if (sessionInfo.hasApiKey) {
         setIsKeySet(true);
+        setUsingSupabaseKey(false); // User is now using their own key
         setValidationResult({ valid: true, message: 'API key saved successfully! AI features are now enabled.' });
         onApiKeyUpdate?.(true);
       } else {
@@ -85,12 +108,16 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
   const handleClearApiKey = () => {
     setApiKey('');
     setIsKeySet(false);
+    setUsingSupabaseKey(false);
     setValidationResult(null);
     
     try {
       localStorage.removeItem('groq_api_key');
       agentService.setGroqApiKey('');
       onApiKeyUpdate?.(false);
+      
+      // Try to fallback to Supabase key
+      checkApiKeyStatus();
     } catch (error) {
       console.warn('Failed to clear API key:', error);
     }
@@ -109,7 +136,7 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
       // Test the connection by asking a simple question
       const response = await agentService.processUserMessage('Test AI connection');
       
-      if (response.data?.expertAdvice || response.agent === 'ai_expert') {
+      if (response.data?.aiAnalysis || response.agent === 'ai_expert') {
         setValidationResult({ valid: true, message: 'AI connection successful! All features are working.' });
       } else {
         setValidationResult({ valid: true, message: 'API key is configured. AI features will activate during conversations.' });
@@ -137,24 +164,42 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
         {/* Status Badge */}
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">AI Status:</span>
-          <Badge variant={isKeySet ? "default" : "outline"} className="flex items-center gap-1">
-            {isKeySet ? (
-              <>
-                <CheckCircle className="w-3 h-3" />
-                Enabled
-              </>
-            ) : (
-              <>
-                <AlertCircle className="w-3 h-3" />
-                Disabled
-              </>
+          <div className="flex items-center gap-2">
+            <Badge variant={isKeySet ? "default" : "outline"} className="flex items-center gap-1">
+              {isKeySet ? (
+                <>
+                  <CheckCircle className="w-3 h-3" />
+                  Enabled
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-3 h-3" />
+                  Disabled
+                </>
+              )}
+            </Badge>
+            {usingSupabaseKey && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Cloud className="w-3 h-3" />
+                Auto
+              </Badge>
             )}
-          </Badge>
+          </div>
         </div>
+
+        {/* Supabase Key Info */}
+        {usingSupabaseKey && (
+          <Alert className="border-blue-500">
+            <Cloud className="h-4 w-4 text-blue-500" />
+            <AlertDescription>
+              Currently using the project's configured Groq API key. You can override this by setting your own key below.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* API Key Input */}
         <div className="space-y-2">
-          <Label htmlFor="api-key">Groq Cloud API Key</Label>
+          <Label htmlFor="api-key">Personal Groq Cloud API Key (Optional)</Label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
@@ -162,7 +207,7 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
                 type={showKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="gsk_your_groq_api_key_here"
+                placeholder="gsk_your_personal_groq_api_key_here"
                 className="pr-10"
               />
               <Button
@@ -188,6 +233,9 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
               Save
             </Button>
           </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Leave empty to use the project's default API key
+          </p>
         </div>
 
         {/* Action Buttons */}
@@ -201,14 +249,14 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
             {isValidating ? 'Testing...' : 'Test Connection'}
           </Button>
           
-          {isKeySet && (
+          {isKeySet && !usingSupabaseKey && (
             <Button
               onClick={handleClearApiKey}
               variant="outline"
               size="sm"
               className="text-red-600 hover:text-red-700"
             >
-              Clear Key
+              Clear Personal Key
             </Button>
           )}
         </div>
@@ -239,9 +287,9 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
           </ul>
           
           <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-1">Get Your API Key:</h5>
+            <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-1">Get Your Personal API Key:</h5>
             <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-              Sign up for free at Groq Cloud to get your API key
+              Get your own Groq API key for personalized rate limits
             </p>
             <Button
               variant="outline"
@@ -257,8 +305,9 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onApiKeyUpdate }) => {
 
         {/* Usage Information */}
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          <p>🔒 Your API key is stored locally in your browser and only used for AI features.</p>
-          <p>💡 MultiBuildAgent works without AI, but enhanced features require the API key.</p>
+          <p>🔒 Your personal API key is stored locally in your browser.</p>
+          <p>💡 MultiBuildAgent works with AI features enabled by default.</p>
+          <p>⚡ Set your own key for dedicated rate limits and usage control.</p>
         </div>
       </CardContent>
     </Card>
