@@ -1,4 +1,3 @@
-
 import { 
   ParsedRequest, 
   ChatMessage, 
@@ -11,6 +10,7 @@ import { InputAgent } from './InputAgent';
 import { PlanningAgent } from './PlanningAgent';
 import { MockCatalogAgent } from './MockCatalogAgent';
 import { GroqAIAgent } from './GroqAIAgent';
+import { RecommendationEngine } from './RecommendationEngine';
 
 interface WorkflowConfig {
   groqApiKey?: string;
@@ -22,6 +22,7 @@ export class WorkflowEngine {
   private planningAgent: PlanningAgent;
   private catalogAgent: MockCatalogAgent;
   private aiAgent: GroqAIAgent | null = null;
+  private recommendationEngine: RecommendationEngine;
   
   private state: WorkflowState = {
     phase: 'input',
@@ -39,6 +40,7 @@ export class WorkflowEngine {
     this.inputAgent = new InputAgent();
     this.planningAgent = new PlanningAgent();
     this.catalogAgent = new MockCatalogAgent();
+    this.recommendationEngine = new RecommendationEngine();
     
     if (config.groqApiKey && config.enableAI) {
       this.aiAgent = new GroqAIAgent({
@@ -61,6 +63,7 @@ export class WorkflowEngine {
     materials?: MaterialCalculation;
     phase: WorkflowPhase;
     aiAnalysis?: any;
+    recommendations?: any[];
   }> {
     console.log('💬 Processing message:', { 
       message: message.substring(0, 100) + '...', 
@@ -82,6 +85,7 @@ export class WorkflowEngine {
     try {
       let response: string;
       let newPhase: WorkflowPhase = this.state.phase;
+      let recommendations: any[] = [];
 
       switch (this.state.phase) {
         case 'input':
@@ -109,7 +113,9 @@ export class WorkflowEngine {
           break;
 
         case 'interactive':
-          response = await this.handleInteractivePhase(message);
+          const interactiveResult = await this.handleInteractivePhase(message);
+          response = interactiveResult.response;
+          recommendations = interactiveResult.recommendations || [];
           break;
 
         default:
@@ -140,7 +146,8 @@ export class WorkflowEngine {
         blueprint: this.state.blueprint || undefined,
         materials: this.state.materials || undefined,
         phase: this.state.phase,
-        aiAnalysis: this.state.aiAnalysis || undefined
+        aiAnalysis: this.state.aiAnalysis || undefined,
+        recommendations
       };
 
     } catch (error) {
@@ -235,9 +242,16 @@ ${materialsList}
 **Total Cost:** €${this.state.materials.totalCost.toFixed(2)}
 **Estimated Delivery:** ${this.state.materials.deliveryTime}
 
+💡 **Smart Recommendations Available:**
+I can now suggest alternative materials to help you:
+• Save money with cheaper alternatives
+• Upgrade to premium options for better quality
+• Find faster delivery options
+• Optimize for your experience level
+
 ${this.aiAgent?.isConfigured() ? 
   "Now let me analyze your project with AI to provide expert recommendations and optimizations." : 
-  "Your complete build plan is ready! I can help guide you through each phase when you're ready to start building."
+  "Your complete build plan is ready! Ask me about alternatives or modifications anytime."
 }`;
 
       return { 
@@ -296,8 +310,13 @@ Your complete build plan is now ready with AI-powered insights! How would you li
     }
   }
 
-  private async handleInteractivePhase(message: string): Promise<string> {
+  private async handleInteractivePhase(message: string): Promise<{ response: string; recommendations?: any[] }> {
     console.log('💬 Handling interactive phase');
+    
+    // Check for recommendation requests
+    if (this.isAskingForRecommendations(message)) {
+      return await this.handleRecommendationRequest(message);
+    }
     
     // Check if user is asking for AI advice
     if (this.aiAgent?.isConfigured() && this.isAskingForAdvice(message)) {
@@ -307,37 +326,117 @@ Your complete build plan is now ready with AI-powered insights! How would you li
           blueprint: this.state.blueprint || undefined,
           materials: this.state.materials || undefined
         });
-        return `🤖 **Expert Advice:**\n\n${advice}`;
+        return { response: `🤖 **Expert Advice:**\n\n${advice}` };
       } catch (error) {
         console.error('❌ AI advice failed:', error);
-        return "I'd be happy to help, but I'm having trouble accessing my AI advisor right now. Could you be more specific about what aspect of the build you need help with?";
+        return { response: "I'd be happy to help, but I'm having trouble accessing my AI advisor right now. Could you be more specific about what aspect of the build you need help with?" };
       }
     }
 
     // Handle specific queries about the project
     if (this.state.blueprint) {
       if (message.toLowerCase().includes('phase') || message.toLowerCase().includes('step')) {
-        return this.describePhases();
+        return { response: this.describePhases() };
       }
       
       if (message.toLowerCase().includes('material') || message.toLowerCase().includes('supply')) {
-        return this.describeMaterials();
+        return { response: this.describeMaterials() };
       }
       
       if (message.toLowerCase().includes('safety') || message.toLowerCase().includes('danger')) {
-        return this.describeSafety();
+        return { response: this.describeSafety() };
       }
       
       if (message.toLowerCase().includes('time') || message.toLowerCase().includes('schedule')) {
-        return this.describeTimeline();
+        return { response: this.describeTimeline() };
       }
       
       if (message.toLowerCase().includes('cost') || message.toLowerCase().includes('budget')) {
-        return this.describeCosts();
+        return { response: this.describeCosts() };
       }
     }
 
-    return "I'm here to help with your build! You can ask me about:\n• Build phases and steps\n• Materials and suppliers\n• Safety guidelines\n• Timeline and scheduling\n• Costs and budgeting\n• Specific construction techniques\n\nWhat would you like to know?";
+    return { response: "I'm here to help with your build! You can ask me about:\n• Build phases and steps\n• Materials and suppliers\n• Safety guidelines\n• Timeline and scheduling\n• Costs and budgeting\n• **Alternative materials and recommendations** 💡\n• Specific construction techniques\n\nWhat would you like to know?" };
+  }
+
+  private isAskingForRecommendations(message: string): boolean {
+    const recommendationKeywords = [
+      'alternative', 'alternatives', 'recommend', 'suggestion', 'suggestions', 
+      'cheaper', 'better', 'upgrade', 'downgrade', 'substitute', 'replace',
+      'different option', 'other options', 'save money', 'cost effective',
+      'premium', 'budget', 'faster delivery'
+    ];
+    return recommendationKeywords.some(keyword => 
+      message.toLowerCase().includes(keyword.toLowerCase())
+    );
+  }
+
+  private async handleRecommendationRequest(message: string): Promise<{ response: string; recommendations: any[] }> {
+    if (!this.state.materials || !this.state.parsedRequest) {
+      return {
+        response: "I need to calculate your materials first. Let me know what you'd like to build!",
+        recommendations: []
+      };
+    }
+
+    const context = {
+      buildType: this.state.parsedRequest.buildType,
+      budget: this.state.parsedRequest.budget?.value,
+      prioritizeQuality: message.toLowerCase().includes('quality') || message.toLowerCase().includes('premium'),
+      prioritizeCost: message.toLowerCase().includes('cheap') || message.toLowerCase().includes('save') || message.toLowerCase().includes('budget'),
+      userExperience: this.state.parsedRequest.experience?.value || 'intermediate'
+    };
+
+    const recommendations = this.recommendationEngine.getRecommendations(
+      this.state.materials.materials,
+      context
+    );
+
+    if (recommendations.length === 0) {
+      return {
+        response: "I couldn't find any suitable alternatives for your current materials. Your selection is already well-optimized for your project!",
+        recommendations: []
+      };
+    }
+
+    let response = "🔍 **Smart Material Recommendations:**\n\n";
+    
+    recommendations.slice(0, 3).forEach((rec, index) => {
+      response += `**${index + 1}. ${rec.original.name} Alternatives:**\n`;
+      
+      rec.alternatives.slice(0, 2).forEach(alt => {
+        const savingsText = alt.costDifference < 0 ? 
+          `💰 Save €${Math.abs(alt.costDifference).toFixed(2)}` : 
+          `⬆️ +€${alt.costDifference.toFixed(2)}`;
+        
+        response += `• **${alt.material.name}** - ${savingsText}\n`;
+        response += `  └ ${alt.reason}\n`;
+        if (alt.qualityImprovement) {
+          response += `  └ Quality: ${alt.qualityImprovement}\n`;
+        }
+      });
+      response += "\n";
+    });
+
+    // Add cost optimization summary
+    const costOptimization = this.recommendationEngine.getCostOptimizations(
+      this.state.materials.materials,
+      this.state.parsedRequest.budget?.value || 1000
+    );
+
+    if (costOptimization.totalSavings > 0) {
+      response += `💡 **Potential Total Savings: €${costOptimization.totalSavings.toFixed(2)}**\n\n`;
+    }
+
+    response += "Would you like me to show you more details about any of these alternatives?";
+
+    return {
+      response,
+      recommendations: recommendations.map(rec => ({
+        original: rec.original,
+        alternatives: rec.alternatives.slice(0, 2)
+      }))
+    };
   }
 
   private isAskingForAdvice(message: string): boolean {

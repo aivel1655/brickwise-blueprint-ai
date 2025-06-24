@@ -13,6 +13,7 @@ const Index = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentBlueprint, setCurrentBlueprint] = useState<EnhancedBlueprint | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   const user = {
     name: 'Max Mustermann',
@@ -28,7 +29,7 @@ const Index = () => {
       id: 'welcome',
       type: 'agent',
       agent: 'iteration',
-      content: `Welcome to MultiBuildAgent 2.0! 🏗️✨\n\nI'm your enhanced AI construction assistant, now powered by the Complete Workflow Engine and Groq Cloud AI. I can help you build:\n\n• 🧱 Walls & garden boundaries\n• 🍕 Pizza ovens & fire pits\n• 🏠 Foundations & structures\n\n**Enhanced Features:**\n• 🤖 AI-powered construction expert advice\n• 🔄 Advanced conversation management\n• 💾 Session persistence & recovery\n• 🎯 Intelligent agent routing\n• 📊 Real-time workflow monitoring\n\nJust tell me what you want to build, and I'll create a professional plan with AI-enhanced insights!\n\n*Tip: Visit Settings to configure additional AI options.*`,
+      content: `Welcome to MultiBuildAgent 2.0! 🏗️✨\n\nI'm your enhanced AI construction assistant, now powered by the Complete Workflow Engine and Smart Recommendation System. I can help you build:\n\n• 🧱 Walls & garden boundaries\n• 🍕 Pizza ovens & fire pits\n• 🏠 Foundations & structures\n\n**Enhanced Features:**\n• 🤖 AI-powered construction expert advice\n• 💡 Smart material recommendations & alternatives\n• 💰 Cost optimization suggestions\n• 🔄 Advanced conversation management\n• 📊 Real-time workflow monitoring\n\nJust tell me what you want to build, and I'll create a professional plan with smart recommendations!\n\n*Tip: Ask for "alternatives" or "cheaper options" anytime to get personalized suggestions.*`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -71,6 +72,7 @@ const Index = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsProcessing(true);
     setSuggestions([]);
+    setRecommendations([]);
 
     try {
       // Get conversation state to determine processing time
@@ -106,6 +108,11 @@ const Index = () => {
         setSuggestions(response.suggestions);
       }
 
+      // Handle recommendations
+      if (response.data?.recommendations) {
+        setRecommendations(response.data.recommendations);
+      }
+
     } catch (error) {
       console.error('Error processing message:', error);
       const errorMessage: ChatMessage = {
@@ -128,9 +135,10 @@ const Index = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               🏗️ MultiBuildAgent 2.0
+              <span className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Smart Recommendations</span>
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Your AI-powered construction planning assistant
+              Your AI-powered construction planning assistant with intelligent material suggestions
             </p>
           </div>
           
@@ -166,6 +174,7 @@ const Index = () => {
             isProcessing={isProcessing}
             currentBlueprint={currentBlueprint}
             suggestions={suggestions}
+            recommendations={recommendations}
           />
         </div>
       </div>

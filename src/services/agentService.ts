@@ -1,5 +1,3 @@
-
-
 import { AgentResponse, ProjectSpecs, Blueprint, BuildPlan, ParsedRequest, Question, ConversationState, MaterialCalculation, EnhancedBlueprint } from '../types';
 import { WorkflowEngine } from './WorkflowEngine';
 
@@ -25,7 +23,8 @@ class AgentService {
           blueprint: result.blueprint,
           materials: result.materials,
           phase: result.phase,
-          aiAnalysis: result.aiAnalysis
+          aiAnalysis: result.aiAnalysis,
+          recommendations: result.recommendations
         }
       };
     } catch (error) {
@@ -122,4 +121,3 @@ class AgentService {
 }
 
 export const agentService = new AgentService();
-

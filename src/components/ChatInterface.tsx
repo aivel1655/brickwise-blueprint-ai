@@ -1,8 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Plus, Lightbulb, AlertCircle } from 'lucide-react';
 import { ChatMessage, AgentResponse, EnhancedBlueprint } from '../types';
 import ChatBubble from './ChatBubble';
+import RecommendationCard from './RecommendationCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,7 @@ interface EnhancedChatInterfaceProps {
   isProcessing: boolean;
   currentBlueprint?: EnhancedBlueprint;
   suggestions?: string[];
+  recommendations?: any[];
 }
 
 const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
@@ -21,7 +22,8 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
   onSendMessage,
   isProcessing,
   currentBlueprint,
-  suggestions = []
+  suggestions = [],
+  recommendations = []
 }) => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -32,7 +34,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, recommendations]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,10 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
     if (!isProcessing) {
       onSendMessage(suggestion);
     }
+  };
+
+  const handleSelectAlternative = (originalId: string, alternativeId: string) => {
+    onSendMessage(`I'd like to replace ${originalId} with ${alternativeId}. Can you update my plan?`);
   };
 
   const getConversationPhase = () => {
@@ -102,7 +108,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
       case 'clarification':
         return 'Please provide the requested information...';
       case 'review':
-        return 'Ask questions about your plan or request modifications...';
+        return 'Ask questions about your plan, request alternatives, or ask for modifications...';
       default:
         return 'Type your message...';
     }
@@ -161,10 +167,18 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                 <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Next Steps:</p>
                 <p className="text-sm">✓ Review your plan in the right panel</p>
                 <p className="text-sm">✓ Check materials and safety guidelines</p>
-                <p className="text-sm">✓ Ask questions or request modifications</p>
+                <p className="text-sm">✓ Ask for alternatives: "Can you suggest cheaper options?"</p>
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Recommendations Display */}
+        {recommendations && recommendations.length > 0 && (
+          <RecommendationCard 
+            recommendations={recommendations}
+            onSelectAlternative={handleSelectAlternative}
+          />
         )}
         
         {isProcessing && (
@@ -177,7 +191,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                   <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
                 <span className="text-orange-600 dark:text-orange-300 text-sm">
-                  {getConversationPhase() === 'planning' ? 'Creating your blueprint...' : 'Agent is thinking...'}
+                  {getConversationPhase() === 'planning' ? 'Creating your blueprint...' : 'Finding recommendations...'}
                 </span>
               </div>
             </div>
@@ -207,6 +221,38 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                 {suggestion}
               </Button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recommendation Quick Actions */}
+      {currentBlueprint && !isProcessing && (
+        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-900/20">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-orange-200 hover:bg-orange-100"
+              onClick={() => handleSuggestionClick("Can you suggest cheaper alternatives?")}
+            >
+              💰 Cheaper Options
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-orange-200 hover:bg-orange-100"
+              onClick={() => handleSuggestionClick("Show me premium upgrades")}
+            >
+              ⭐ Premium Options
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-orange-200 hover:bg-orange-100"
+              onClick={() => handleSuggestionClick("Find faster delivery materials")}
+            >
+              🚚 Faster Delivery
+            </Button>
           </div>
         </div>
       )}
@@ -251,7 +297,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
             <p>💡 Try: "I want to build a garden wall 2m long" or "Help me build a pizza oven"</p>
           )}
           {getConversationPhase() === 'review' && (
-            <p>💡 Ask: "Can you suggest alternatives?" or "What if I'm a beginner?"</p>
+            <p>💡 Ask: "Can you suggest alternatives?" or "What are cheaper options?"</p>
           )}
         </div>
       </div>
