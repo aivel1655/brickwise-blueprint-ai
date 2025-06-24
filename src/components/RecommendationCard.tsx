@@ -81,7 +81,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                       <span className="font-medium text-sm">{alt.material.name}</span>
                       {getCostIcon(alt.costDifference)}
                       <Badge className={`text-xs ${getCostBadgeColor(alt.costDifference)}`}>
-                        {alt.costDifference < 0 ? '-' : '+'€{Math.abs(alt.costDifference).toFixed(2)}
+                        {alt.costDifference < 0 ? '-' : '+'}€{Math.abs(alt.costDifference).toFixed(2)}
                       </Badge>
                     </div>
                     
