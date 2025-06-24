@@ -1,3 +1,4 @@
+
 import Groq from 'groq-sdk';
 import { ChatMessage, ParsedRequest, EnhancedBlueprint, MaterialCalculation } from '../types';
 
@@ -26,11 +27,16 @@ interface AIAnalysisResult {
   response: string;
 }
 
+interface ConversationMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 export class GroqAIAgent {
   private groq: Groq | null = null;
   private model: string;
   private maxTokens: number;
-  private conversationHistory: { role: string; content: string }[] = [];
+  private conversationHistory: ConversationMessage[] = [];
 
   constructor(config: GroqAIAgentConfig) {
     this.model = config.model || 'llama-3.3-70b-versatile';
