@@ -159,7 +159,7 @@ export interface ChatMessage {
   timestamp: Date;
   data?: any;
   sender?: 'user' | 'assistant';
-  agent?: 'iteration' | 'planner' | 'builder' | 'joule';
+  agent?: 'iteration' | 'planner' | 'builder' | 'joule' | 'requirements' | 'calculation' | 'image' | 'summary';
 }
 
 export interface AgentResponse {

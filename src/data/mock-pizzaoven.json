@@ -1,0 +1,51 @@
+{
+  "project": "Pizzaofen",
+  "requirements": {
+    "min_area_sqm": 1.2,
+    "max_area_sqm": 2.5,
+    "material_preference": null,
+    "quality_option": null
+  },
+  "components": [
+    {
+      "name": "Schamottsteine",
+      "amount": 40,
+      "price_per_unit": 3.5,
+      "options": {
+        "schnell": {"amount": 30, "price_per_unit": 4.0},
+        "günstig": {"amount": 40, "price_per_unit": 2.8},
+        "premium": {"amount": 45, "price_per_unit": 5.2}
+      }
+    },
+    {
+      "name": "Backofen-Tür",
+      "amount": 1,
+      "price_per_unit": 60,
+      "options": {
+        "schnell": {"amount": 1, "price_per_unit": 55},
+        "günstig": {"amount": 1, "price_per_unit": 40},
+        "premium": {"amount": 1, "price_per_unit": 120}
+      }
+    },
+    {
+      "name": "Mörtel",
+      "amount": 2,
+      "price_per_unit": 15,
+      "options": {
+        "schnell": {"amount": 2, "price_per_unit": 18},
+        "günstig": {"amount": 2, "price_per_unit": 12},
+        "premium": {"amount": 3, "price_per_unit": 20}
+      }
+    },
+    {
+      "name": "Betonfundament",
+      "amount": 1,
+      "price_per_unit": 50,
+      "options": {
+        "schnell": {"amount": 1, "price_per_unit": 60},
+        "günstig": {"amount": 1, "price_per_unit": 40},
+        "premium": {"amount": 1, "price_per_unit": 80}
+      }
+    }
+  ]
+}
